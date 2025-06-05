@@ -52,7 +52,7 @@ MikroWeb adalah sistem dashboard hotspot berbasis **MikroTik RouterOS** yang ter
 
 | Dashboard Mobile | User Mobile |
 |-----------------|------------|
-| ![](/frontend/mobiledasboard.png) | ![](/frontend/mobileuser.png) |
+| ![](/frontend/mobiledashboard.png) | ![](/frontend/mobileusers.png) |
 
 ---
 

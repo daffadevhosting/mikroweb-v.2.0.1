@@ -1,0 +1,133 @@
+<style>    
+canvas {
+  filter: drop-shadow(0 0 8px #00c6ff50);
+}
+
+.card {
+  border-radius: 15px;
+  overflow: hidden;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+}
+
+.card-title {
+  font-weight: 600;
+}
+.download-ring.glow, .upload-ring.glow {
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+  transition: box-shadow 0.3s;
+}
+</style>
+
+<div class="col-md-10 mb-4">
+    <div class="card text-white shadow-lg border-0">
+    <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-graph-up-arrow text-info"></i> Realtime Traffic</h5>
+          <div class="d-flex gap-2"><span id="status" class="badge text-bg-danger d-none"></span><span id="downloadSpeed" class="badge download-ring text-bg-success"></span><span id="uploadSpeed" class="badge upload-ring text-bg-danger"></span></div>
+    </div>
+        <canvas id="trafficChart" height="80"></canvas>
+    </div>
+    <div class="card-footer text-end text-muted small">
+        Distributed by <a href="https://github.com/putridinar" class="text-info" target="_blank">Putri Dinar</a>
+    </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('trafficChart').getContext('2d');
+
+const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+gradient.addColorStop(0, '#00c6ff');
+gradient.addColorStop(1, '#0072ff');
+
+const trafficData = {
+  labels: Array.from({ length: 20 }, () => ''),
+  datasets: [{
+    label: 'Traffic Mbps',
+    data: Array(20).fill(0),
+    fill: true,
+    backgroundColor: gradient,
+    borderColor: '#00c6ff',
+    borderWidth: 2,
+    tension: 0.3,
+    pointRadius: 0
+  }]
+};
+
+const trafficChart = new Chart(ctx, {
+  type: 'line',
+  data: trafficData,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#ccc' },
+        grid: { color: 'rgba(255,255,255,0.05)' }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { color: '#ccc' },
+        grid: { color: 'rgba(255,255,255,0.05)' }
+      }
+    }
+  }
+});
+
+function updateSpeed(upload, download) {
+  document.getElementById("downloadSpeed").textContent = download + " Mbps";
+  document.getElementById("uploadSpeed").textContent = upload + " Mbps";
+
+  const dRing = document.querySelector(".download-ring");
+  const uRing = document.querySelector(".upload-ring");
+
+  dRing.classList.toggle("glow", download > 10);
+  uRing.classList.toggle("glow", upload > 5);
+}
+
+function getTimeLabel() {
+  const now = new Date();
+  return now.toLocaleTimeString('en-GB', { hour12: false });
+}
+
+// Jalankan saat user login
+setInterval(() => {
+  firebase.auth().currentUser.getIdToken().then(idToken => {
+    document.getElementById("status").innerText = "Mengambil data router...";
+
+    return fetch("{{site.php_url}}/php/traffic_realtime.php", {
+      headers: { Authorization: "Bearer " + idToken }
+    });
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error('HTTP error! Status: ' + res.status);
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (data.success) {
+      const rx = data.download;
+      const tx = data.upload;
+
+      // Update chart
+      trafficData.labels.push("Now");
+      trafficData.labels.shift();
+      trafficData.datasets[0].data.push(rx);
+      trafficData.datasets[0].data.shift();
+
+      trafficChart.update();
+      updateSpeed(tx, rx);
+    } else {
+      console.warn("Gagal ambil data:", data.message);
+    }
+  })
+  .catch(error => {
+    console.error("Fetch error:", error);
+    document.getElementById("status").innerText = "Gagal ambil data";
+  });
+}, 1000000);
+</script>

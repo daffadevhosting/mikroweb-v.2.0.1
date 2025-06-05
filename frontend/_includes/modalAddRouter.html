@@ -1,0 +1,155 @@
+<!-- Modal Tambah Router -->
+<div class="modal fade" id="modalTambahRouter" tabindex="-1" aria-labelledby="modalTambahRouterLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="formTambahRouter" class="modal-content blur">
+      <div class="modal-header text-white">
+        <h5 class="modal-title" id="modalTambahRouterLabel">Tambah Router</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nama Router</label>
+          <input type="text" class="form-control" id="router-name" name="routerName" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">IP Address</label>
+          <input type="text" class="form-control" id="ip-router" name="ip" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" id="user-name" name="userName" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="pass-word" name="password" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+        <div id="alert"></div>
+    </form>
+  </div>
+</div>
+<script>
+firebase.auth().onAuthStateChanged(async function (user) {
+  if (!user) {
+    showToast("Warning", "Silakan login terlebih dahulu.", "warning");
+    window.location.href = "/login";
+    return;
+  }
+
+  const uid = user.uid;
+
+  try {
+    // Cek apakah user adalah admin
+    const adminSnap = await firebase.database().ref("users/" + uid + "/isAdmin").once("value");
+    const isAdmin = adminSnap.val();
+
+    if (!isAdmin) {
+      showToast("Peringatan", "Akses ditolak. Kamu bukan admin.", "warning");
+      await firebase.auth().signOut();
+      window.location.href = "/403";
+      return;
+    }
+
+    // Cek apakah router sudah ada
+    const dbRef = firebase.database().ref('mikrotik_logins/' + uid);
+    const snapshot = await dbRef.once('value');
+
+  } catch (error) {
+    console.error("Gagal autentikasi atau cek router:", error);
+    showToast("Error", "Terjadi kesalahan saat autentikasi", "danger");
+    window.location.href = "/403";
+  }
+});
+
+document.getElementById('formTambahRouter')?.addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const ipInput = document.getElementById('ip-router');
+  const usernameInput = document.getElementById('user-name');
+  const passwordInput = document.getElementById('pass-word');
+  const routernameInput = document.getElementById('router-name');
+  const alertBox = document.getElementById('alert');
+
+  if (!ipInput || !usernameInput || !passwordInput || !routernameInput || !alertBox) {
+    console.error("Elemen form tidak ditemukan!");
+    showToast("Gagal", "Beberapa elemen form tidak ditemukan di halaman.", "danger");
+    return;
+  }
+
+  const ip = ipInput.value.trim();
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value;
+  const routerName = routernameInput.value.trim();
+
+  alertBox.innerHTML = `
+    <div class="flex-center">
+      <div class="d-flex justify-content-center align-items-center h-100 w-100">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    showToast("Gagal...", "Akses ditolak. kamu belum login.", "danger");
+    return;
+  }
+
+  try {
+    const idToken = await user.getIdToken();
+
+    const response = await fetch('{{site.php_url}}/php/add_router.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + idToken
+      },
+      body: JSON.stringify({ ip, username, password, routerName })
+    });
+
+    const res = await response.json();
+
+    if (!res.success) {
+      showToast("Maaf", `${res.error}`, "danger");
+      document.getElementById('formTambahRouter').reset();
+      setTimeout(() => location.reload(), 3000);
+      return;
+    }
+
+    const ref = firebase.database().ref('mikrotik_logins/' + user.uid);
+    const existingSnap = await ref.orderByChild('ip').equalTo(ip).once('value');
+
+    if (existingSnap.exists()) {
+      showToast("Info", "Router dengan IP ini sudah ditambahkan sebelumnya.", "warning");
+    }
+
+    const isDefault = !(await ref.once('value')).exists(); // True jika router pertama
+
+    const newRouterRef = ref.push();
+    await newRouterRef.set({
+      ip,
+      username,
+      password,
+      routerName,
+      owner: user.uid,
+      isDefault
+    });
+
+    showToast("Berhasil", res.message || "Router berhasil ditambahkan.", "success");
+    document.getElementById('formTambahRouter').reset();
+
+    setTimeout(() =>  location.reload(), 2000);
+
+  } catch (err) {
+    console.error("Submit error:", err);
+    showToast("Error", err.message, "danger");
+    document.getElementById('formTambahRouter').reset();
+    setTimeout(() => location.reload(), 3000);
+  }
+});
+</script>

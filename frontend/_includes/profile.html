@@ -1,0 +1,44 @@
+
+<!-- Profile Dropdown -->
+<div class="dropdown text-end">
+  <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+    <img src="https://i.pravatar.cc/40" alt="profile" width="40" height="40" class="rounded-circle">
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end p-0 shadow" aria-labelledby="dropdownUser" style="width: 350px;">
+
+    <!-- Banner -->
+    <div class="position-relative">
+      <img src="https://via.placeholder.com/350x100" class="img-fluid" style="height: 100px; object-fit: cover;">
+      <img src="https://via.placeholder.com/80" class="rounded-circle position-absolute top-100 start-50 translate-middle border border-white" style="width: 80px; height: 80px;">
+    </div>
+
+    <!-- Username and short info -->
+    <div class="text-center mt-4 mb-3">
+      <strong class="d-block">Nama Pengguna</strong>
+      <small class="text-muted">@namapengguna</small>
+    </div>
+
+    <!-- Divider -->
+    <li><hr class="dropdown-divider"></li>
+
+    <!-- Router Info -->
+    <li class="px-3 pb-2">
+      <div id="router-info" class="row gy-2">
+        <div class="col-6"><strong>Model:</strong> <span id="model">RB4011</span></div>
+        <div class="col-6"><strong>Versi ROS:</strong> <span id="version">7.14</span></div>
+        <div class="col-6"><strong>CPU:</strong> <span id="cpu">ARM 4-Core</span></div>
+        <div class="col-6"><strong>Board:</strong> <span id="board-name">RB4011iGS+</span></div>
+        <div class="col-6"><strong>Uptime:</strong> <span id="uptime">5d 12h</span></div>
+        <div class="col-6"><strong>CPU Load:</strong> <span id="cpu-load">23%</span></div>
+      </div>
+    </li>
+
+    <!-- Divider -->
+    <li><hr class="dropdown-divider"></li>
+
+    <!-- Logout Button -->
+    <li class="px-3 pb-3">
+      <button class="btn btn-danger w-100">Logout</button>
+    </li>
+  </ul>
+</div>

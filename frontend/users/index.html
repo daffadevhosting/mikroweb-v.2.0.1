@@ -1,0 +1,277 @@
+---
+layout: default
+title: Users Hotspot
+permalink: /users
+---
+
+<!-- Toast -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
+  <div id="userToast" class="toast text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastBody">Ada pengguna online!</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow rounded-4">
+  <div class="card-header d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0 text-light">Pengguna Hotspot</h4>
+    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+      <i class="bi bi-plus-lg me-1"></i> Tambah User
+    </button>
+  </div>
+  <div class="card-body">
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead id="thead" class="table text-light">
+      <tr>
+        <th>#</th>
+        <th>Username</th>
+        <th>Profile</th>
+        <th>IP</th>
+        <th>Uptime</th>
+        <th>Download</th>
+        <th>Upload</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody class="text-light" id="usersTable"></tbody>
+  </table>
+</div>
+
+<div id="spinner" class="text-center my-3" style="display:none;">
+    <div class="position-absolute top-50 start-50 translate-middle">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  </div>
+</div>
+
+  </div>
+<nav>
+  <ul class="pagination justify-content-center" id="pagination"></ul>
+</nav>
+</div>
+
+<!-- Modal Tambah User -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-bg-dark">
+      <form id="formAddUser">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalAddUserLabel">Tambah User Hotspot</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body ">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="useRName" class="form-control" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="text" id="pasSWord" class="form-control" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label for="profile" class="form-label">Profile</label>
+            <input type="text" id="proFile" class="form-control" name="profile" value="default" required>
+          </div>
+          <div class="mb-3">
+            <label for="session_timeout" class="form-label">Session Timeout (jam)</label>
+            <input type="number" id="sessionTimeout" class="form-control" name="session_timeout" value="1" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="rate_limit" class="form-label">Rate Limit (Download/Upload)</label>
+            <input type="text" id="rateLimit" class="form-control" name="rate_limit" value="1M/1M">
+          </div>
+          <div class="mb-3">
+            <label for="shared_users" class="form-label">Shared Users</label>
+            <input type="number" id="sharedUsers" class="form-control" name="shared_users" value="1" min="1">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Tambah User</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        </div>
+      </form>
+<script>
+document.getElementById('formAddUser').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    showToast("Gagal Login", "Anda belum login", "error");
+    return;
+  }
+
+  try {
+    const uid = user.uid;
+    const token = await user.getIdToken();
+
+    // 🔥 Ambil data router default dari Firebase
+    const snap = await firebase.database().ref('mikrotik_logins/' + uid).once('value');
+    const routers = snap.val();
+    if (!routers) {
+      showToast("Gagal", "Router tidak ditemukan di akun ini", "error");
+      return;
+    }
+
+    const defaultRouter = Object.values(routers).find(r => r.isDefault);
+    if (!defaultRouter) {
+      showToast("Gagal", "Router default belum diatur", "error");
+      return;
+    }
+
+    // 🔁 Siapkan data user dan router
+    const payload = {
+      token: token,
+      username: document.getElementById("useRName").value,
+      password: document.getElementById("pasSWord").value,
+      profile: document.getElementById("proFile").value,
+      rate_limit: document.getElementById("rateLimit").value,
+      session_timeout: document.getElementById("sessionTimeout").value,
+      shared_users: document.getElementById("sharedUsers").value,
+      router: {
+        ip: defaultRouter.ip,
+        username: defaultRouter.username,
+        password: defaultRouter.password
+      }
+    };
+
+    const response = await fetch('{{site.php_url}}/php/add_user.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    showToast(result.success ? "Sukses" : "Gagal", result.message, result.success ? "success" : "error");
+
+    if (result.success) {
+      this.reset();
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddUser'));
+      modal.hide();
+    }
+
+  } catch (err) {
+    console.error("Tambah user error:", err);
+    showToast("Gagal", "Terjadi kesalahan saat tambah user", "error");
+  }
+});
+</script>
+    </div>
+  </div>
+</div>
+<script>
+function showToast(title, msg, type = 'primary') {
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastBody').textContent = msg;
+  const toast = new bootstrap.Toast(document.getElementById('userToast'));
+  toast.show();
+}
+
+function showSpinner(show = true) {
+  document.getElementById('spinner').style.display = show ? 'block' : 'none';
+}
+
+function fetchUsers(idToken) {
+  showSpinner(true);
+  fetch('{{site.php_url}}/php/list_users.php', {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + idToken
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    showSpinner(false);
+    if (data.success && Array.isArray(data.users)) {
+      allUsers = data.users.filter(u => u.username !== 'default-trial');
+      currentPage = 1;
+      renderUsers();
+      renderPagination();
+    } else {
+      console.error('Gagal ambil user:', data.message || 'Tidak ada data');
+    }
+  })
+  .catch(err => {
+    showSpinner(false);
+    console.error('Fetch error:', err);
+  });
+}
+
+function badge(status) {
+  return status === 'Online'
+    ? '<span class="badge bg-success">Online</span>'
+    : '<span class="badge bg-secondary">Offline</span>';
+}
+
+const usersPerPage = 10;
+let allUsers = [];
+let currentPage = 1;
+
+function renderUsers() {
+  const tbody = document.getElementById('usersTable');
+  tbody.innerHTML = '';
+
+  const start = (currentPage - 1) * usersPerPage;
+  const end = start + usersPerPage;
+  const pageUsers = allUsers.slice(start, end);
+
+  pageUsers.forEach((u, i) => {
+    const key = `notified_${u.username}`;
+
+    if (u.status === 'Online') {
+      if (!localStorage.getItem(key)) {
+        showToast('User Online', `${u.username} sedang online`, 'success');
+        localStorage.setItem(key, 'true');
+      }
+    } else {
+      localStorage.removeItem(key);
+    }
+
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${start + i + 1}</td>
+        <td>${u.username}</td>
+        <td>${u.profile || '-'}</td>
+        <td>${u.ip || '-'}</td>
+        <td>${u.uptime || '-'}</td>
+        <td>${u.download || '-'}</td>
+        <td>${u.upload || '-'}</td>
+        <td>${badge(u.status)}</td>
+      </tr>
+    `);
+  });
+}
+
+function renderPagination() {
+  const pagination = document.getElementById('pagination');
+  pagination.innerHTML = '';
+
+  const totalPages = Math.ceil(allUsers.length / usersPerPage);
+
+  for (let i = 1; i <= totalPages; i++) {
+    pagination.insertAdjacentHTML('beforeend', `
+      <li class="page-item ${i === currentPage ? 'active' : ''}">
+        <button class="page-link" onclick="goToPage(${i})">${i}</button>
+      </li>
+    `);
+  }
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderUsers();
+  renderPagination();
+}
+
+firebase.auth().onAuthStateChanged(user => {
+  if (!user) return;
+  user.getIdToken().then(token => {
+    fetchUsers(token); // panggil pertama
+    setInterval(() => fetchUsers(token), 10000); // refresh tiap 10 detik
+  });
+});
+</script>

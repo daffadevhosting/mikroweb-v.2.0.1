@@ -1,0 +1,96 @@
+<div class="modal fade" id="editPaketModal" tabindex="-1" aria-labelledby="editPaketLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editPaketForm">
+        <div class="modal-header text-white">
+          <h5 class="modal-title" id="editPaketLabel">Edit Paket Topup</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editPaketId">
+          <div class="mb-2">
+            <label class="form-label">Nama Paket</label>
+            <input type="text" id="editPaketName" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Jenis Paket</label>
+            <select id="editPaketJenis" class="form-select" required>
+              <option value="time">Berbasis Waktu</option>
+              <option value="quota">Berbasis Kuota</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Pilih Bandwidth</label>
+            <select id="editPaketBandwidth" class="form-select" required></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">💾 Simpan</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+const paketModal = new bootstrap.Modal(document.getElementById('editPaketModal'));
+
+// Fungsi menampilkan modal + isi data
+function editPackage(id) {
+  firebase.database().ref("packages/" + id).once("value").then((snap) => {
+    const p = snap.val();
+    if (!p) {
+      alert("❌ Paket tidak ditemukan");
+      return;
+    }
+
+    document.getElementById('editPaketId').value = id;
+    document.getElementById('editPaketName').value = p.name || "";
+    document.getElementById('editPaketJenis').value = p.type || "";
+
+    // Load dropdown Bandwidth
+    populateBandwidthOptions('editPaketBandwidth', p.bandwidth_id);
+
+    // Tampilkan modal
+    paketModal.show();
+  });
+}
+
+// Populate dropdown bandwidth dan auto-pilih jika ada
+function populateBandwidthOptions(selectId, selectedId = '') {
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">Loading...</option>`;
+  firebase.database().ref("bandwidths").once("value", (snap) => {
+    select.innerHTML = "";
+    snap.forEach(child => {
+      const b = child.val();
+      const option = document.createElement("option");
+      option.value = child.key;
+      option.textContent = `${b.name} (${b.rate_limit})`;
+      if (child.key === selectedId) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+  });
+}
+
+// Simpan perubahan edit paket
+document.getElementById('editPaketForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const id = document.getElementById('editPaketId').value;
+  const data = {
+    name: document.getElementById('editPaketName').value,
+    type: document.getElementById('editPaketJenis').value,
+    bandwidth_id: document.getElementById('editPaketBandwidth').value
+  };
+
+  firebase.database().ref("packages/" + id).update(data)
+    .then(() => {
+      alert("✅ Paket berhasil diupdate!");
+      paketModal.hide();
+    })
+    .catch(err => alert("❌ Gagal update: " + err));
+});
+</script>

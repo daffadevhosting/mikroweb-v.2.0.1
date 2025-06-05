@@ -1,0 +1,70 @@
+
+    <div class="col-md-8 mb-4">
+        <div class="card shadow blurry">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between">
+                <h5 class="card-title text-white">User Aktif</h5>
+                <button class="btn btn-outline-light my-3 btn-sm" data-bs-toggle="modal" data-bs-target="#topuUsermodal">
+                  <i class="bi bi-ethernet"></i> Top Up User
+                </button>
+              </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                <thead class="table-dark text-center">
+                    <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>IP Address</th>
+                    <th>Uptime</th>
+                    <th>Download</th>
+                    <th>Upload</th>
+                    </tr>
+                </thead>
+                <tbody id="active-users-body" class="text-center">
+                    <!-- Isi akan dimuat via JavaScript -->
+                </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+<script>
+function loadActiveUsers() {
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (user) {
+    const token = await user.getIdToken();
+
+  fetch("{{site.php_url}}/php/getActiveUsers.php", {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(users => {
+      const tbody = document.getElementById("active-users-body");
+      tbody.innerHTML = "";
+      users.forEach((user, index) => {
+        const row = `
+          <tr class="dark-blurry text-white">
+            <td class="text-white">${index + 1}</td>
+            <td class="text-white">${user.username}</td>
+            <td class="text-white">${user.ip}</td>
+            <td class="text-white">${user.uptime}</td>
+            <td class="text-white">${user.download}</td>
+            <td class="text-white">${user.upload}</td>
+          </tr>`;
+        tbody.insertAdjacentHTML("beforeend", row);
+      });
+    })
+    .catch(err => console.error("Gagal memuat data user aktif:", err));
+  }
+});
+}
+
+// Muat data tiap 5 detik
+//setInterval(loadActiveUsers, 5000);
+loadActiveUsers(); // Panggil pertama kali
+</script>
+{% include modalUserTopup.html %}

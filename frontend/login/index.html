@@ -1,0 +1,223 @@
+---
+layout: none
+title: Admin login
+permalink: /login
+---
+
+
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: page.lang | default: 'id | ID' }}">
+
+  {% include head.html %}
+
+  <body class="text-white vh-100">
+<style>
+@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,700&display=swap);
+
+body {
+    background-color: #111927;
+    background-image: 
+        radial-gradient(at 47% 33%, hsl(233.49, 77%, 40%) 0, transparent 59%), 
+        radial-gradient(at 82% 65%, hsl(218.00, 39%, 11%) 0, transparent 55%);
+
+}
+
+@media only screen and (max-width: 767px) {
+    .hide-on-mobile {
+        display: none;
+    }
+
+.login-box {
+    min-height: -webkit-fill-available !important;
+    }
+}
+
+.login-box {
+    background-size: cover;
+    background-position: center;
+    padding: 25px;
+    min-height: 550px;
+    -webkit-box-shadow: 0 2px 60px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 60px -5px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(17, 25, 40, 0.75);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.125);
+    position: absolute;
+    max-width: 900px;
+    width: 90%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.logo {
+    font-family: "Script MT";
+    font-size: 45px;
+    text-align: center;
+    color: #888888;
+    margin-bottom: 0px;
+}
+
+.logo .logo-font {
+    color: #3BC3FF;
+}
+
+@media only screen and (max-width: 767px) {
+    .logo {
+        font-size: 34px;
+    }
+}
+
+.header-title {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.login-form {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.login-form .form-control {
+    border-radius: 25px;
+    margin-bottom: 30px;
+}
+
+.login-form .form-group {
+    position: relative;
+}
+
+.login-form .form-group .forgot-password {
+    position: absolute;
+    top: 6px;
+    right: 15px;
+}
+
+.login-form .btn {
+    border-radius: var(--bs-border-radius)!important;
+    -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.login-form .btn.btn-primary {
+    background: #3BC3FF;
+    border-color: #31c0ff;
+}
+
+.slider-feature-card {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    max-width: 280px;
+    margin: 0 auto;
+    padding: 30px;
+    text-align: center;
+    -webkit-box-shadow: 0 2px 25px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 25px -3px rgba(0, 0, 0, 0.1);
+}
+
+.slider-feature-card img {
+    height: 80px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.slider-feature-card h3,
+.slider-feature-card p {
+    margin-bottom: 30px;
+}
+
+.carousel-indicators {
+    bottom: -50px;
+}
+
+.carousel-indicators li {
+    cursor: pointer;
+}
+</style>
+<section class="body text-white">
+    <div class="container">
+        <div class="card login-box mx-auto">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="logo">
+                        <span class="logo-font">Admin</span>Login
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <br>
+                    <h3 class="header-title">{{site.admin}}</h3>
+                    <form id="adminLoginForm" class="login-form">
+                      <div id="error-msg" class="text-danger mt-3 text-center"></div>
+                        <div class="form-group">
+                            <input type="email" id="email" autocomplete="current-email" class="form-control dark-blurry" placeholder="Email or UserName" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="password" class="form-control dark-blurry" required autocomplete="current-password" placeholder="Password">
+                            <a href="/" class="forgot-password">Forgot Password?</a>
+                        </div>
+                        <div class="d-grid gap-2 mx-auto">
+                            <button type="submit" class="btn btn-primary btn-block">LOGIN</button>
+                        </div>
+                        <div class="form-group">
+                            <div class="text-center">MikroWeb <span class="text-info">{{site.versi}}</span> by {{site.author}}</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-sm-6 hide-on-mobile">
+                    <div id="demo" class="carousel slide" data-ride="carousel">
+                        <!-- Indicators -->
+                        <ul class="carousel-indicators">
+                            <li data-target="#demo" data-slide-to="0" class="active"></li>
+                            <li data-target="#demo" data-slide-to="1"></li>
+                        </ul>
+                        <!-- The slideshow -->
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <div class="slider-feature-card">
+                                    <img src="{{site.baseurl}}/assets/images/routr.svg" alt="">
+                                    <h3 class="slider-title">{{site.title}}</h3>
+                                    <p class="slider-description">{{site.description}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+  {% include liveToast.html %}
+  <script>
+    document.getElementById("adminLoginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const errorMsg = document.getElementById("error-msg");
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+        showToast("Login", "Autentikasi berhasil! Mengalihkan...", "success");
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 3000);
+        })
+        .catch((error) => {
+    showToast("Login Gagal", "Terjadi kesalahan saat autentikasi", "danger");
+        });
+    });
+  </script>
+<script src="{{ '/assets/js/alert.js' | relative_url }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="{{ '/assets/vendor/bootstrap/bootstrap/dist/js/bootstrap.min.js' | relative_url }}" crossorigin="anonymous"></script>
+</body>
+</html>

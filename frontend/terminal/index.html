@@ -1,0 +1,127 @@
+---
+layout: default
+title: Cli Terminal
+permalink: /terminal
+---
+
+
+<style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #terminal {
+      font-family: 'Courier New', monospace;
+      color: #00FF00 !important;
+      margin-top: 0px;
+      height: 85dvh;
+      box-sizing: border-box;
+      overflow-y: auto !important;
+      white-space: pre-wrap;
+      padding: 10px;
+      background: #000000c9;
+      border-radius: 16px;
+    }
+
+    #terminal::-webkit-scrollbar {
+      display: none;
+    }
+
+    #terminal {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+
+    .prompt {
+      font-family: 'Courier New', monospace;
+      display: inline;
+    }
+
+    .input-line {
+      font-family: 'Courier New', monospace;
+      display: inline;
+    }
+
+    input {
+      font-family: 'Courier New', monospace;
+      background: none;
+      border: none;
+      color: #00FF00 !important;
+      font-family: inherit;
+      font-size: 1em;
+      outline: none;
+      width: 80%;
+    }
+
+    ::selection {
+      background: rgba(0, 255, 0, 0.3);
+    }
+
+    .caret {
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+</style>
+
+<div class="card shadow" id="terminal">
+  <div><span class="prompt">[admin@mikroweb] &gt; </span><span class="input-line"><input id="terminalInput" autofocus></span></div>
+</div>
+
+<script>
+  const input = document.getElementById("terminalInput");
+  const terminal = document.getElementById("terminal");
+
+  input.addEventListener("keydown", async function(event) {
+    if (event.key === "Enter") {
+      const cmd = input.value;
+      const promptText = `[admin@mikroweb] > `;
+      const line = document.createElement("div");
+      line.textContent = promptText + cmd;
+      terminal.insertBefore(line, input.parentElement.parentElement);
+
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        printToTerminal("❌ Anda belum login.");
+        input.value = "";
+        return;
+      }
+
+      const token = await user.getIdToken();
+
+      fetch("{{site.php_url}}/php/terminal.php", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token
+        },
+        body: new URLSearchParams({ command: cmd })
+      })
+      .then(res => res.json())
+      .then(data => {
+        printToTerminal(data.output || data.error || "❌ Gagal.");
+      })
+      .catch(err => {
+        printToTerminal("⚠️ Error: " + err.message);
+      });
+
+      input.value = "";
+      scrollToBottom();
+    }
+  });
+
+  function printToTerminal(text) {
+    const output = document.createElement("div");
+    output.textContent = text;
+    terminal.insertBefore(output, input.parentElement.parentElement);
+  }
+
+  function scrollToBottom() {
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+</script>

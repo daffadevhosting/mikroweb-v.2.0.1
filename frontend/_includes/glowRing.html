@@ -1,0 +1,122 @@
+
+<div class="col-md-2 mb-4">
+    <div class="d-flex gap-2 p-2 flex-col card shadow blurry" style="width: 100%;">
+        <div class="glow-ring-card">
+            <h6 class="text-white text-center">Upload</h6>
+            <div class="glow-ring">
+            <div class="ring">
+                <svg width="130" height="130">
+                <circle cx="65" cy="65" r="55" stroke="#2e2e2e" stroke-width="12" fill="none"/>
+                <circle id="ring-upload" cx="65" cy="65" r="55" stroke="#00f7ff" stroke-width="12" fill="none"
+                    stroke-dasharray="345" stroke-dashoffset="345" stroke-linecap="round"/>
+                </svg>
+                <div class="ring-text">
+                <div id="speed-upload">0 Mbps</div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="glow-ring-card">
+            <h6 class="text-white text-center">Download</h6>
+            <div class="glow-ring">
+            <div class="ring">
+                <svg width="130" height="130">
+                <circle cx="65" cy="65" r="55" stroke="#2e2e2e" stroke-width="12" fill="none"/>
+                <circle id="ring-download" cx="65" cy="65" r="55" stroke="#00f7ff" stroke-width="12" fill="none"
+                    stroke-dasharray="345" stroke-dashoffset="345" stroke-linecap="round"/>
+                </svg>
+                <div class="ring-text">
+                <div id="speed-download">0 Mbps</div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+.glow-ring-wrapper {
+  justify-content: center;
+}
+
+.glow-ring-card {
+  background: #1e1e2f;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
+  max-width: 180px;
+  width: 100%;
+}
+
+.glow-ring {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ring {
+  position: relative;
+  width: 130px;
+  height: 130px;
+}
+
+.ring svg {
+  transform: rotate(-90deg);
+}
+
+.ring-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #00f7ff;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+}
+</style>
+<script>
+function updateGlowRing(id, speed, maxSpeed) {
+  const circle = document.getElementById(id);
+  const speedText = document.getElementById(id === 'ring-download' ? 'speed-download' : 'speed-upload');
+  const percent = Math.min(speed / maxSpeed, 1);
+  const radius = 55;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - percent);
+  circle.style.strokeDashoffset = offset;
+  speedText.textContent = speed.toFixed(1) + " Mbps";
+
+  // Warn color
+  if (speed > maxSpeed * 0.9) {
+    circle.style.stroke = "#ff0033"; // red
+    speedText.style.color = "#ff0033";
+  } else {
+    circle.style.stroke = "#ee6b00";
+    speedText.style.color = "#00f7ff";
+  }
+}
+
+// Fetch tiap 2 detik
+setInterval(() => {
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (user) {
+    const token = await user.getIdToken();
+
+  fetch("{{site.php_url}}/php/glowBandwidth.php", {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        updateGlowRing("ring-download", data.download, 5); 
+        updateGlowRing("ring-upload", data.upload, 3);
+      }
+    });
+  }
+});
+}, 2000000);
+</script>

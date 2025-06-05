@@ -1,0 +1,51 @@
+<div class="modal fade" id="topuUsermodal" tabindex="-1" aria-labelledby="topuUsermodal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTambahRouterLabel">User-Profile Baru</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formTopupUser">
+        <select name="username" id="usernameSelect"></select>
+        <select name="paketId" id="paketSelect"></select>
+        <select name="routerId" id="routerSelect"></select>
+        <select name="paymentMethod">
+            <option value="Tunai">Tunai</option>
+            <option value="QRIS">QRIS</option>
+        </select>
+        <button type="submit">TopUp</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (!user) return;
+
+const idToken = await user.getIdToken();
+document.getElementById('formTopupUser').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const data = {
+    username: usernameSelect.value,
+    paketId: paketSelect.value,
+    routerId: routerSelect.value,
+    paymentMethod: paymentMethod.value
+  };
+
+  const res = await fetch('{{site.php_url}}/php/topup_user.php', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  const json = await res.json();
+  alert(json.message);
+});
+});
+</script>

@@ -1,0 +1,24 @@
+# 🔒 BACKEND: Ignore file rahasia & depedensi
+/backend/php/secret/
+/backend/vendor/
+/backend/.env
+/backend/composer.lock
+
+# 🔧 FRONTEND: Ignore hasil build & env
+/frontend/_site/
+/frontend/.jekyll-cache/
+/frontend/.env
+/frontend/Gemfile.lock
+
+# 🗃️ Umum: file temp, log, sistem
+*.log
+*.tmp
+*.cache
+.DS_Store
+Thumbs.db
+
+# 🧠 Editor config
+.vscode/
+.idea/
+*.swp
+*.swo

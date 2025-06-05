@@ -1,0 +1,67 @@
+<div class="modal fade" id="editRouterModal" tabindex="-1" aria-labelledby="editRouterLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editRouterForm">
+        <div class="modal-header text-white">
+          <h5 class="modal-title" id="editRouterLabel">Edit Router</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editRouterId">
+          <div class="mb-3">
+            <label for="routerName" class="form-label">Nama Router</label>
+            <input type="text" class="form-control" id="routerName" required>
+          </div>
+          <div class="mb-3">
+            <label for="routerIP" class="form-label">IP Address</label>
+            <input type="text" class="form-control" id="routerIP" required>
+          </div>
+          <div class="mb-3">
+            <label for="routerUsername" class="form-label">Username</label>
+            <input type="text" class="form-control" id="routerUsername" required>
+          </div>
+          <div class="mb-3">
+            <label for="routerPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="routerPassword" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function editRouter(routerId) {
+  const uid = firebase.auth().currentUser.uid;
+  firebase.database().ref(`mikrotik_logins/${uid}/${routerId}`).once("value").then((snap) => {
+    const r = snap.val();
+    document.getElementById("routerName").value = r.routerName || '';
+    document.getElementById("routerIP").value = r.ip || '';
+    document.getElementById("routerUsername").value = r.username || '';
+    document.getElementById("routerPassword").value = r.password || '';
+
+    const modal = new bootstrap.Modal(document.getElementById('editRouterModal'));
+    modal.show();
+  });
+}
+
+document.getElementById("editRouterForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const uid = firebase.auth().currentUser.uid;
+  const data = {
+    routerName: document.getElementById("routerName").value,
+    ip: document.getElementById("routerIP").value,
+    username: document.getElementById("routerUsername").value,
+    password: document.getElementById("routerPassword").value
+  };
+  firebase.database().ref(`mikrotik_logins/${uid}/${routerId}`).update(data)
+    .then(() => {
+      alert("✅ Router diperbarui");
+      bootstrap.Modal.getInstance(document.getElementById("editRouterModal")).hide();
+    })
+    .catch(err => alert("❌ Gagal: " + err));
+});
+</script>

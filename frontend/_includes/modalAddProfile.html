@@ -1,0 +1,85 @@
+<div class="modal fade" id="modalTambahProfile" tabindex="-1" aria-labelledby="modalTambahProfile" aria-hidden="true">
+  <div class="modal-dialog">
+      <form id="formAddProfile" class="modal-content bg-dark text-bg-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTambahRouterLabel">User-Profile Baru</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-2 mb-2">
+          <div class="col-md-6">
+            <input type="text" class="form-control" id="profileName" name="name" placeholder="Nama Profile" required>
+          </div>
+          <div class="col-md-6">
+            <input type="text" class="form-control" id="rateLimit" name="rate_limit" placeholder="Rate Limit (misal: 2M/2M)">
+          </div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-md-6">
+            <input type="number" class="form-control" id="sharedUsers" name="shared_users" placeholder="Shared Users" min="1">
+          </div>
+          <div class="col-md-6">
+            <input type="text" class="form-control" id="sessionTimeout" name="session_timeout" placeholder="Session Timeout (hh:mm:ss)">
+          </div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-md-6">
+            <textarea class="form-control" id="onLoginScript" name="on_login" placeholder="On-Login Script (Opsional)" rows="2"></textarea>
+          </div>
+          <div class="col-md-6">
+            <textarea class="form-control" id="schedulerScript" name="scheduler" placeholder="Scheduler Script (Opsional)" rows="2"></textarea>
+          </div>
+        </div>
+        </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Simpan</button>
+      </div>
+      </form>
+  </div>
+</div>
+<script>
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (!user) return;
+
+  const idToken = await user.getIdToken();
+
+  // ➕ Submit tambah user-profile
+  document.getElementById('formAddProfile').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const payload = {
+      name: document.getElementById("profileName").value,
+      rate_limit: document.getElementById("rateLimit").value,
+      shared_users: document.getElementById("sharedUsers").value,
+      session_timeout: document.getElementById("sessionTimeout").value,
+      on_login: document.getElementById("onLoginScript").value,
+      scheduler: document.getElementById("schedulerScript").value
+    };
+
+    const response = await fetch('{{site.php_url}}/php/add_user_profile.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + idToken
+      },
+      body: JSON.stringify(payload)
+    });
+
+
+const result = await response.json();
+
+    if (result.success) {
+      showToast('Berhasil', result.message, 'success');
+      document.getElementById('formAddProfile').reset();
+      modal.dismiss();
+      setTimeout(() => {
+      loadUserProfiles(); // refresh data
+      }, 3000);
+    } else {
+      showToast('Gagal', result.message || 'Gagal tambah profile', 'error');
+    }
+  });
+});
+</script>

@@ -1,0 +1,144 @@
+<style>
+  .mini-card {
+    position: relative;
+    padding: 1.2rem 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 0.2rem 0.6rem rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+  }
+  .mini-card:hover {
+    transform: translateY(-3px);
+  }
+  .mini-card-icon {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 4rem;
+    color: rgba(71, 71, 71, 0.712);
+    pointer-events: none;
+  }
+  .mini-card-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #555;
+  }
+  .mini-card-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #222;
+  }
+</style>
+
+  <div class="row g-3" id="hotspot-cards">
+  <div class="col-md-6 col-lg-3">
+    <div class="mini-card text-white card-blue position-relative overflow-hidden rounded-4">
+      <div class="position-absolute top-0 end-0 opacity-25 p-3">
+        <i class="bi bi-person-lines-fill text-primary display-1"></i>
+      </div>
+      <div class="card-body">
+        <h6 class="card-title">Total Member</h6>
+        <p class="fs-4 fw-bold mb-0" id="total-users">...</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-3">
+    <div class="mini-card text-white card-green position-relative overflow-hidden rounded-4">
+      <div class="position-absolute top-0 end-0 opacity-25 p-3">
+        <i class="bi bi-wifi text-success display-1"></i>
+      </div>
+      <div class="card-body">
+        <h6 class="card-title">Online</h6>
+        <p class="fs-4 fw-bold mb-0" id="online-users">...</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-3">
+    <div class="mini-card text-white card-yellow position-relative overflow-hidden rounded-4">
+      <div class="position-absolute top-0 end-0 opacity-25 p-3">
+        <i class="bi bi-cash-coin text-warning display-1"></i>
+      </div>
+      <div class="card-body">
+        <h6 class="card-title">Pendapatan Harian</h6>
+        <p class="fs-4 fw-bold mb-0" id="daily-income">...</p>
+      </div>
+    </div>
+  </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="mini-card text-white card-red position-relative overflow-hidden rounded-4">
+      <div class="position-absolute top-0 end-0 opacity-25 p-3">
+        <i class="bi bi-wallet2 text-danger display-1"></i>
+      </div>
+      <div class="card-body">
+        <h6 class="card-title">Pendapatan Bulanan</h6>
+        <p class="fs-4 fw-bold mb-0" id="monthly-income">...</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (user) {
+    const token = await user.getIdToken();
+    const ignoreList = ['default', 'admin', 'default-trial'];
+
+fetch("{{site.php_url}}/php/hotspot_stats.php", {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    })
+  .then(res => res.json())
+  .then(data => {
+    if (!ignoreList.includes(data.success)) {
+      document.getElementById("total-users").textContent = data.total_users;
+      document.getElementById("online-users").textContent = data.online_users;
+    } else {
+      document.getElementById("total-users").textContent = "Gagal";
+      document.getElementById("online-users").textContent = "Gagal";
+    }
+  })
+  .catch(err => {
+    document.getElementById("total-users").textContent = "Error";
+    document.getElementById("online-users").textContent = "Error";
+  });
+  
+function formatDate(date) {
+  return date.toISOString().slice(0, 10); // "YYYY-MM-DD"
+}
+
+async function fetchPendapatan() {
+  const today = formatDate(new Date());
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const startMonthStr = startOfMonth.toISOString().slice(0, 10);
+
+  // Misal struktur: /transactions/{transactionId} dengan field "date" (YYYY-MM-DD) dan "amount"
+  
+  // Pendapatan Harian
+  let pendapatanHarian = 0;
+  await db.ref('transactions').orderByChild('date').equalTo(today).once('value', snapshot => {
+    snapshot.forEach(tx => {
+      pendapatanHarian += Number(tx.val().amount || 0);
+    });
+  });
+
+  // Pendapatan Bulanan
+  let pendapatanBulanan = 0;
+  await db.ref('transactions').orderByChild('date').startAt(startMonthStr).once('value', snapshot => {
+    snapshot.forEach(tx => {
+      pendapatanBulanan += Number(tx.val().amount || 0);
+    });
+  });
+
+  return { pendapatanHarian, pendapatanBulanan };
+}
+
+fetchPendapatan().then(({pendapatanHarian, pendapatanBulanan}) => {
+  document.getElementById('daily-income').textContent = pendapatanHarian.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
+  document.getElementById('monthly-income').textContent = pendapatanBulanan.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
+});
+  }
+});
+</script>

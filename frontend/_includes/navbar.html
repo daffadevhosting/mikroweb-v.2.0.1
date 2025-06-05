@@ -1,0 +1,77 @@
+<!-- Navbar -->
+<nav id="navbar" class="navbar navbar-expand-lg navbar-dark position-fixed shadow glass-nav">
+  <div class="container-fluid">
+    <span class="navbar-brand fw-bold"><i class="bi bi-terminal"></i> Control Hub</span>
+
+    <div class="dropdown d-flex align-items-center">
+        <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+      <span class="text-light me-3"><i class="bi bi-person-bounding-box"></i></i> <span id="usermail"></span> </span>
+          <img src="https://i.pravatar.cc/40" alt="profile" width="40" height="40" class="rounded-circle">
+        </a>
+  <ul class="dropdown-menu dropdown-menu-end text-white p-0 shadow" aria-labelledby="dropdownUser" style="width: 350px;background: var(--card-dark-bg);overflow: hidden;">
+
+    <!-- Banner -->
+    <div class="position-relative">
+      <img src="{{site.baseurl}}/assets/images/banner.jpg" class="img-fluid" style="height: 100px; object-fit: cover;width: 100dvw;background-position: center;background-size: cover;">
+      <img src="https://i.pravatar.cc/80" class="rounded-circle position-absolute top-100 start-0 translate-middle-y m-2 border border-white" style="width: 80px; height: 80px;">
+    </div>
+
+    <!-- Username and short info -->
+    <div class="text-center mt-4 mb-3">
+      <strong id="user-me" class="d-block">Nama Pengguna</strong>
+      <small id="user-email" class="text-muted">@namapengguna</small>
+    </div>
+
+<script>
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      const uid = user.uid;
+      firebase.database().ref(`users/${uid}`).once('value')
+        .then(snapshot => {
+          const userData = snapshot.val();
+          if (userData) {
+            const name = userData.name || "Nama Tidak Diketahui";
+            const emailPrefix = userData.email ? userData.email.split("@")[0] : "user";
+            
+            document.getElementById("user-me").textContent = name;
+            document.getElementById("user-email").textContent = "@" + emailPrefix;
+            document.getElementById("usermail").textContent = "@" + emailPrefix;
+          } else {
+            console.warn("Data user tidak ditemukan.");
+          }
+        })
+        .catch(error => {
+          console.error("Gagal mengambil data user:", error);
+        });
+    } else {
+      console.warn("User belum login.");
+    }
+  });
+</script>
+
+    <!-- Divider -->
+    <li><hr class="dropdown-divider"></li>
+
+    <!-- Router Info -->
+    <li class="px-3 pb-2">
+      <div id="router-info" class="row gy-2">
+        <div class="col-6"><strong>Model:</strong> <span id="model">RB4011</span></div>
+        <div class="col-6"><strong>Versi ROS:</strong> <span id="version">7.14</span></div>
+        <div class="col-6"><strong>CPU:</strong> <span id="cpu">ARM 4-Core</span></div>
+        <div class="col-6"><strong>Board:</strong> <span id="board-name">RB4011iGS+</span></div>
+        <div class="col-6"><strong>Uptime:</strong> <span id="uptime">5d 12h</span></div>
+        <div class="col-6"><strong>CPU Load:</strong> <span id="cpu-load">23%</span></div>
+      </div>
+    </li>
+
+    <!-- Divider -->
+    <li><hr class="dropdown-divider"></li>
+
+    <!-- Logout Button -->
+    <li class="px-3 pb-3">
+      <button onclick="logout()" class="btn btn-danger w-100">Logout</button>
+    </li>
+  </ul>
+    </div>
+  </div>
+</nav>

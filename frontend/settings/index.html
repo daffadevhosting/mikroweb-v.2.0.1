@@ -1,0 +1,295 @@
+---
+layout: default
+title: Setting Hotspot
+permalink: /settings
+---
+<style>td {color: #9b9b9b !important;}</style>
+<div class="card shadow mb-4 text-light">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-router-fill"></i> Routers</span>
+  <div class="">
+    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahRouter"><i class="bi bi-node-plus-fill"></i> Tambah Router</button>
+  </div>
+</div>
+  <div class="table-responsive">
+    <table class="table mb-0 text-light" id="routerTable">
+      <thead class="table text-light">
+        <tr>
+          <th>Nama Router</th>
+          <th>IP</th>
+          <th>Username</th>
+          <th>Default</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+firebase.auth().onAuthStateChanged((user) => {
+  if (!user) return;
+  const uid = user.uid;
+  const table = document.querySelector("#routerTable tbody");
+
+  firebase.database().ref(`mikrotik_logins/${uid}`).once("value").then((snapshot) => {
+    table.innerHTML = "";
+    if (!snapshot.exists()) {
+      table.innerHTML = "<tr><td colspan='5' class='text-center'>Belum ada router</td></tr>";
+      return;
+    }
+
+    snapshot.forEach((child) => {
+      const key = child.key;
+      const r = child.val();
+      const defaultBadge = r.isDefault ? "<span class='badge bg-success'>Aktif</span>" : "";
+
+      const row = `
+        <tr>
+          <td>${r.routerName}</td>
+          <td>${r.ip}</td>
+          <td>${r.username}</td>
+          <td>${defaultBadge}</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="editRouter('${key}')"><i class="bi bi-pencil-square"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRouter('${key}')"><i class="bi bi-trash3"></i></button>
+            ${!r.isDefault ? `<button class="btn btn-sm btn-success" onclick="setDefaultRouter('${key}')"><i class="bi bi-plugin"></i></button>` : ""}
+          </td>
+        </tr>
+      `;
+      table.innerHTML += row;
+    });
+  });
+});
+
+function setDefaultRouter(selectedId) {
+  const uid = firebase.auth().currentUser.uid;
+  const ref = firebase.database().ref(`mikrotik_logins/${uid}`);
+
+  ref.once("value").then((snap) => {
+    const updates = {};
+    snap.forEach((child) => {
+      const id = child.key;
+      updates[`${id}/isDefault`] = (id === selectedId);
+    });
+    ref.update(updates).then(() => {
+      showToast("Berhasil", "✅ Router default diperbarui", "success");
+      setTimeout(() => {
+      location.reload();
+      }, 3000);
+    });
+  });
+}
+
+function editRouter() {
+  const uid = firebase.auth().currentUser.uid;
+  firebase.database().ref(`mikrotik_logins/${uid}`).once("value").then((snap) => {
+    const data = snap.val();
+    alert(`Edit Router:\nNama: ${data.routerName}`);
+
+  location.reload(); // Refresh daftar router
+  });
+}
+
+function deleteRouter(routerId) {
+  const uid = firebase.auth().currentUser.uid;
+  if (confirm("Yakin hapus router ini?")) {
+    firebase.database().ref(`mikrotik_logins/${uid}/${routerId}`).remove().then(() => {
+      showToast("Berhasil", "✅ Router telah dihapus", "success");
+      setTimeout(() => {
+      location.reload();
+      }, 3000);
+    });
+  }
+}
+</script>
+{% include modalEditRouter.html %}
+{% include modalAddRouter.html %}
+
+<style>
+.table th, .table td {
+  vertical-align: middle;
+}
+</style>
+<div class="card shadow mb-4 text-light">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-list-ul"></i> User-Profiles</span>
+  <div class="">
+    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalHargaProfile"><i class="bi bi-cash-coin"></i> Harga</button>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahProfile"><i class="bi bi-list-ul"></i> Tambah</button>
+  </div>
+</div>
+  <div id="loadingSpinner" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status"></div>
+    <div>Memuat data profile...</div>
+  </div>
+  <div class="table-responsive">
+  <table class="table d-none" id="profileTable">
+      <thead id="thead" class="table text-light d-none">
+        <tr>
+          <th>#no.</th>
+          <th>Nama</th>
+          <th>Rate Limit</th>
+          <th>Session Timeout</th>
+          <th>Shared Users</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+    <tbody id="profileTableBody"></tbody>
+  </table>
+</div>
+  <nav>
+    <ul class="pagination justify-content-center mt-3" id="pagination"></ul>
+  </nav>
+</div>
+<script>
+const pageSize = 10;
+let currentPage = 1;
+let allProfiles = [];
+
+
+async function loadProfiles() {
+  document.getElementById('loadingSpinner').classList.remove('d-none');
+  document.getElementById('profileTable').classList.add('d-none');
+
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+
+  const idToken = await user.getIdToken();
+
+  const response = await fetch('{{site.php_url}}/php/get_profilesUser.php', {
+    headers: {
+        'Authorization': 'Bearer ' + idToken,
+        'Content-Type': 'application/json'
+    }
+  });
+
+  const result = await response.json();
+  if (!result.success) {
+    showToast("Gagal", "Gagal ambil data: " + result.message, "error");
+    return;
+  }
+
+allProfiles = (result.data || []).filter(p => p && p.name);
+  renderProfiles();
+
+  document.getElementById('loadingSpinner').classList.add('d-none');
+  document.getElementById('profileTable').classList.remove('d-none');
+  document.getElementById('thead').classList.remove('d-none');
+}
+
+let selectedProfileToDelete = null;
+const ignoreList = ['default', 'admin', 'default-trial'];
+
+function renderProfiles() {
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+  const pageItems = allProfiles.slice(start, end);
+  const tbody = document.getElementById('profileTableBody');
+  tbody.innerHTML = "";
+
+  pageItems?.forEach((p, i) => {
+    if (p.name && !ignoreList.includes(p.name.toLowerCase())) {
+      const row = `
+        <tr>
+          <td>${start + i + 1}</td>
+          <td>${p.name || '-'}</td>
+          <td>${p.rate_limit || '-'}</td>
+          <td>${p.session_timeout || '-'}</td>
+          <td>${p.shared_users || '-'}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-1" onclick="editProfile('${p.name}')">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+            <button class="btn btn-danger btn-sm btn-delete" data-id="${p.keyId}" data-name="${p.name}">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    }
+  });
+
+  renderPagination();
+}
+
+function editProfile(name) {
+  showToast('Perhatian', 'Edit belum diimplementasi di UI. (backend sudah siap)', 'warning');
+}
+let selectedProfile = null;
+function showDeleteConfirm(keyId, name) {
+  selectedProfile = { keyId, name };
+  document.getElementById('globalConfirmMessage').innerText = `Yakin ingin hapus profile "${name}"?`;
+  new bootstrap.Modal(document.getElementById('globalConfirmModal')).show();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+document.body.addEventListener('click', function (e) {
+  if (e.target.closest('.btn-delete')) {
+    const btn = e.target.closest('.btn-delete');
+    const keyId = btn.getAttribute('data-id');
+    const name = btn.getAttribute('data-name');
+    showDeleteConfirm(keyId, name);
+  }
+});
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+  if (!selectedProfile) return;
+
+  const user = firebase.auth().currentUser;
+  const token = await user.getIdToken();
+
+  const response = await fetch('{{site.php_url}}/php/deleteProfiles.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({ '.id': selectedProfile.keyId })
+  });
+
+  const result = await response.json();
+
+  if (result.success) {
+    showToast('Sukses', '✅ Profile berhasil dihapus', 'success');
+    setTimeout(() => {
+      loadUserProfiles();
+    }, 1000);
+  } else {
+    showToast('Gagal', result.message || 'Gagal menghapus profile', 'error');
+  }
+
+  selectedProfile = null;
+  bootstrap.Modal.getInstance(document.getElementById('globalConfirmModal')).hide();
+  });
+});
+
+function renderPagination() {
+  const totalPages = Math.ceil(allProfiles.length / pageSize);
+  const pagination = document.getElementById('pagination');
+  pagination.innerHTML = '';
+
+  for (let i = 1; i <= totalPages; i++) {
+    const li = document.createElement('li');
+    li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+    li.addEventListener('click', function (e) {
+      e.preventDefault();
+      currentPage = i;
+      renderProfiles();
+    });
+    pagination.appendChild(li);
+  }
+}
+
+// 🔄 Load saat halaman dibuka
+firebase.auth().onAuthStateChanged(user => {
+  if (user) loadProfiles();
+});
+</script>
+{% include modalAddProfile.html %}
+{% include confirm.html %}
+{% include modalAddHarga.html %}
+

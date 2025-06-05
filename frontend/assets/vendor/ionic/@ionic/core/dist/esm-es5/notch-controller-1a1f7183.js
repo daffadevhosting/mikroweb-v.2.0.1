@@ -1,0 +1,4 @@
+/*!
+ * (C) Ionic http://ionicframework.com - MIT License
+ */
+import{w as win}from"./index-a5d50daf.js";import{r as raf}from"./helpers-d94bc8ad.js";var createNotchController=function(n,r,e){var t;var i=function(){var t=r();if(t===undefined||n.label!==undefined||e()===null){return false}return true};var f=function(){if(i()){raf((function(){o()}))}};var o=function(){var f=r();if(f===undefined){return}if(!i()){f.style.removeProperty("width");return}var u=e().scrollWidth;if(u===0&&f.offsetParent===null&&win!==undefined&&"IntersectionObserver"in win){if(t!==undefined){return}var d=t=new IntersectionObserver((function(n){if(n[0].intersectionRatio===1){o();d.disconnect();t=undefined}}),{threshold:.01,root:n});d.observe(f);return}f.style.setProperty("width","".concat(u*.75,"px"))};var u=function(){if(t){t.disconnect();t=undefined}};return{calculateNotchWidth:f,destroy:u}};export{createNotchController as c};

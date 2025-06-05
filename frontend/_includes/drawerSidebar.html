@@ -1,0 +1,78 @@
+<div class="drawer">
+  {% include clockCard.html %}
+    <div id="menuToggle" class="menu_toggle">
+        <span></span>
+    </div>
+    <div id="drawer" class="navigationDrawer">
+        <ul class="menu">
+            <li>
+                <a href="{{ site.baseurl }}/dashboard" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Dashboard">
+                    <span class="icon">
+                    <i class="bi bi-house"></i></span>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ site.baseurl }}/users" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Users">
+                    <span class="icon">
+                    <i class="bi bi-person"></i></span>
+                    <span class="text">Users</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ site.baseurl }}/hotspot" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Hotspot">
+                    <span class="icon">
+                    <i class="bi bi-wifi"></i></span>
+                    <span class="text">Hotspot</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ site.baseurl }}/settings" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Setting">
+                    <span class="icon">
+                    <i class="bi bi-gear"></i></span>
+                    <span class="text">Setting</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ site.baseurl }}/terminal" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="TermUx">
+                    <span class="icon">
+                    <i class="bi bi-terminal"></i></span>
+                    <span class="text">TermUx</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:;" onclick="logout()" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Logout">
+                    <span class="icon">
+                    <i class="bi bi-box-arrow-right"></i></span>
+                    <span class="text">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const base = '{{ site.baseurl }}'; // Untuk Jekyll
+    const currentLink = window.location.pathname.replace(base, '');
+    const drawerLinks = document.querySelectorAll('.navigationDrawer ul.menu li a');
+
+    drawerLinks.forEach((a) => {
+        const hrefPath = new URL(a.href).pathname.replace(base, '');
+
+        if (currentLink === hrefPath) {
+            a.classList.add('active');
+        } else {
+            a.classList.remove('active');
+        }
+    });
+</script>
+<script>
+  function logout() {
+    firebase.auth().signOut().then(function() {
+      console.log("User signed out.");
+      window.location.href = "/login";
+    }).catch(function(error) {
+      console.error("Logout error:", error);
+    });
+  }
+</script>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="{{ site.lang | default: page.lang | default: 'id | ID' }}" data-bs-theme="dark">
+
+  {% include head.html %}
+
+  <body style="background: var(--bs);color: var(--bs-body-bg);">
+  {% include drawerSidebar.html %}
+  {% include navbar.html %}
+    <!-- Main Content -->
+	<div class="content" id="mainContent">
+		<div class="container mt-4">
+			  {{ content }}
+		</div>
+  {% include tabNavigasi.html %}
+	</div>
+	
+<script>
+  const btnToggle = document.getElementById('toggleJam');
+  const toggleBtn = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('drawer');
+  const content = document.getElementById('mainContent');
+  const navbar = document.getElementById('navbar');
+  const clockCard = document.getElementById('clockCard');
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('expand');
+    content.classList.toggle('expand');
+    navbar.classList.toggle('expand');
+    toggleBtn.classList.toggle('expand');
+  });
+  
+  btnToggle.addEventListener('click', () => {
+    clockCard.classList.toggle('expand');
+      setTimeout(() => {
+      clockCard.classList.toggle('expand');
+      }, 2000);
+    });
+</script>
+
+<div id="globalAlert" class="alert d-none" role="alert"></div>
+{% include liveToast.html %}
+{% include confirm.html %}
+<script src="{{ '/assets/js/alert.js' | relative_url }}"></script>
+  {% include onAuthStateChanged.html %}
+<!-- Bootstrap JS & Sidebar Logic -->
+<script src="{{ '/assets/vendor/bootstrap/@popperjs/core/dist/umd/popper.min.js' | relative_url }}" crossorigin="anonymous"></script>
+<script src="{{ '/assets/vendor/bootstrap/bootstrap/dist/js/bootstrap.min.js' | relative_url }}" crossorigin="anonymous"></script>
+</body>
+</html>

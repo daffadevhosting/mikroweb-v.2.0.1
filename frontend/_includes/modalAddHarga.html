@@ -1,0 +1,121 @@
+<div class="modal fade" id="modalHargaProfile" tabindex="-1" aria-labelledby="modalHargaProfile" aria-hidden="true">
+  <div class="modal-dialog">
+<form id="formTambahPaket" class="modal-content bg-dark text-white">
+  <div class="modal-header">
+    <h5 class="modal-title">Tambah Paket Hotspot</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-2">
+      <label for="namaPaket" class="form-label">Nama Paket</label>
+      <input type="text" class="form-control" id="namaPaket" name="nama_paket" required>
+    </div>
+
+    <div class="mb-2">
+      <label for="userProfile" class="form-label">User-Profile (Mikrotik)</label>
+      <select class="form-select" id="userProfile" name="user-profile" required>
+        <option value="">Pilih Profile...</option>
+        <!-- Nanti diisi via JS fetch dari Mikrotik -->
+      </select>
+    </div>
+
+    <div class="mb-2">
+      <label for="hargaPaket" class="form-label">Harga Paket (Rp)</label>
+      <input type="number" class="form-control" id="hargaPaket" name="harga" min="0" required>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Simpan Paket</button>
+  </div>
+</form>
+<script>
+document.getElementById('formTambahPaket').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const user = firebase.auth().currentUser;
+  const idToken = await user.getIdToken();
+
+  const namaPaket = document.getElementById('namaPaket').value;
+  const userProfile = document.getElementById('userProfile').value;
+  const harga = document.getElementById('hargaPaket').value;
+
+const res = await fetch('{{site.php_url}}/php/add_paket.php', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + idToken
+  },
+  body: JSON.stringify({ namaPaket, userProfile, harga })
+});
+
+const text = await res.text();
+console.log('Raw response:', text);
+
+let data = {};
+try {
+  data = JSON.parse(text);
+} catch (e) {
+  console.error('Gagal parsing JSON:', e);
+  showToast('Gagal parsing response dari server!');
+  return;
+}
+
+if (!data.success) {
+  showToast(`Gagal menambah paket: ${data.message || 'Unknown error'}`);
+} else {
+  showToast('Berhasil', 'Paket berhasil ditambahkan!', 'success');
+  document.getElementById('formTambahPaket').reset();
+}
+});
+
+let userProfilesLoaded = false;
+
+async function loadUserProfiles() {
+  if (userProfilesLoaded) return;
+
+  try {
+    const user = firebase.auth().currentUser;
+    if (!user) throw new Error("User belum login");
+
+    const idToken = await user.getIdToken();
+
+    const res = await fetch('{{site.php_url}}/php/get_user_profiles.php', {
+      method: 'GET',
+      headers: {
+      'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + idToken
+      }
+    });
+
+    if (!res.ok) throw new Error('Unauthorized');
+
+    const prof = await res.json();
+    const select = document.getElementById('userProfile');
+    const ignoreList = ['default', 'admin', 'default-trial'];
+
+    select.innerHTML = '<option value="">Pilih Profile...</option>';
+
+    prof
+      .filter(p => p.name && !ignoreList.includes(p.name.toLowerCase()))
+      .forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.name + (p.rate_limit ? ` (${p.rate_limit})` : '');
+        select.appendChild(opt);
+      });
+
+    userProfilesLoaded = true;
+    showToast('Modal BS alert', 'Berhasil memuat user-profiles dari Mikrotik!', 'success');
+
+  } catch (err) {
+    console.error('Gagal ambil profile:', err);
+    showToast('Modal BS alert', 'Gagal memuat user-profiles dari Mikrotik!', 'danger');
+  }
+}
+
+// Panggil saat modal dibuka (biar selalu fresh)
+// Ini yang benar
+document.getElementById('modalHargaProfile').addEventListener('show.bs.modal', loadUserProfiles);
+</script>
+  </div>
+</div>

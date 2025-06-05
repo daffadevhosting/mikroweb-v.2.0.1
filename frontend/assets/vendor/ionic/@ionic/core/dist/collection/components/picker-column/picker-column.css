@@ -1,0 +1,228 @@
+/**
+ * Convert a font size to a dynamic font size.
+ * Fonts that participate in Dynamic Type should use
+ * dynamic font sizes.
+ * @param size - The initial font size including the unit (i.e. px or pt)
+ * @param unit (optional) - The unit to convert to. Use this if you want to
+ * convert to a unit other than $baselineUnit.
+ */
+/**
+ * Convert a font size to a dynamic font size but impose
+ * a maximum font size.
+ * @param size - The initial font size including the unit (i.e. px or pt)
+ * @param maxScale - The maximum scale of the font (i.e. 2.5 for a maximum 250% scale).
+ * @param unit (optional) - The unit to convert the initial font size to. Use this if you want to
+ * convert to a unit other than $baselineUnit.
+ */
+/**
+ * Convert a font size to a dynamic font size but impose
+ * a minimum font size.
+ * @param size - The initial font size including the unit (i.e. px or pt)
+ * @param minScale - The minimum scale of the font (i.e. 0.8 for a minimum 80% scale).
+ * @param unit (optional) - The unit to convert the initial font size to. Use this if you want to
+ * convert to a unit other than $baselineUnit.
+ */
+/**
+ * Convert a font size to a dynamic font size but impose
+ * maximum and minimum font sizes.
+ * @param size - The initial font size including the unit (i.e. px or pt)
+ * @param minScale - The minimum scale of the font (i.e. 0.8 for a minimum 80% scale).
+ * @param maxScale - The maximum scale of the font (i.e. 2.5 for a maximum 250% scale).
+ * @param unit (optional) - The unit to convert the initial font size to. Use this if you want to
+ * convert to a unit other than $baselineUnit.
+ */
+/**
+ * A heuristic that applies CSS to tablet
+ * viewports.
+ *
+ * Usage:
+ * @include tablet-viewport() {
+ *   :host {
+ *     background-color: green;
+ *   }
+ * }
+ */
+/**
+ * A heuristic that applies CSS to mobile
+ * viewports (i.e. phones, not tablets).
+ *
+ * Usage:
+ * @include mobile-viewport() {
+ *   :host {
+ *     background-color: blue;
+ *   }
+ * }
+ */
+:host {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  height: 200px;
+  font-size: 22px;
+  text-align: center;
+}
+
+/**
+ * Renders an invisible element on top of the column that receives focus
+ * events. This allows screen readers to navigate the column.
+ */
+.assistive-focusable {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.assistive-focusable:focus {
+  outline: none;
+}
+
+.picker-opts {
+  /**
+   * This padding must be set here and not on the
+   * host to ensure that the focus highlight on the
+   * column is not overly narrow.
+   */
+  -webkit-padding-start: 16px;
+  padding-inline-start: 16px;
+  -webkit-padding-end: 16px;
+  padding-inline-end: 16px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  /**
+   * When using reactive data, such as in datetime's
+   * wheel picker, there may be layout shifts between
+   * individual columns in a picker as the columns
+   * shrink to fit the widest item in the column.
+   * Setting a minimum width avoids this layout shifting.
+   *
+   * Note that we need this min-width set on the same
+   * element as the vertical padding (i.e. not on the
+   * host).
+   */
+  min-width: 26px;
+  max-height: 200px;
+  outline: none;
+  /**
+   * Added so that text-align can be set on the host
+   * from external components. For example, datetime
+   * changes the alignment of specific columns in its
+   * wheel pickers.
+   */
+  text-align: inherit;
+  scroll-snap-type: y mandatory;
+  /**
+   * Need to explicitly set overflow-x: hidden
+   * for older implementations of scroll snapping.
+   */
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+
+.picker-item-empty {
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  display: block;
+  width: 100%;
+  height: 34px;
+  border: 0px;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font-family: var(--ion-font-family, inherit);
+  font-size: inherit;
+  line-height: 34px;
+  text-align: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/**
+ * Hide scrollbars on Chrome and Safari
+ */
+.picker-opts::-webkit-scrollbar {
+  display: none;
+}
+
+::slotted(ion-picker-column-option) {
+  display: block;
+  scroll-snap-align: center;
+}
+
+.picker-item-empty,
+:host(:not([disabled])) ::slotted(ion-picker-column-option.option-disabled) {
+  scroll-snap-align: none;
+}
+
+::slotted([slot=prefix]), ::slotted([slot=suffix]) {
+  max-width: 200px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+::slotted([slot=prefix]) {
+  /**
+   * This is added in addition to the column's own padding so that there is white
+   * space between the slot and the column's focus highlight.
+   */
+  -webkit-padding-start: 16px;
+  padding-inline-start: 16px;
+  -webkit-padding-end: 16px;
+  padding-inline-end: 16px;
+  padding-top: 0;
+  padding-bottom: 0;
+  justify-content: end;
+}
+
+::slotted([slot=suffix]) {
+  /**
+   * This is added in addition to the column's own padding so that there is white
+   * space between the slot and the column's focus highlight.
+   */
+  -webkit-padding-start: 16px;
+  padding-inline-start: 16px;
+  -webkit-padding-end: 16px;
+  padding-inline-end: 16px;
+  padding-top: 0;
+  padding-bottom: 0;
+  justify-content: start;
+}
+
+:host(.picker-column-disabled) .picker-opts {
+  overflow-y: hidden;
+}
+
+/**
+ * When the column is disabled, none of the options
+ * should be interactive. However, we do not disable
+ * the buttons because that would require overriding the
+ * app's preference for each option. In this case,
+ * the picker column interactive as a whole is
+ * disabled, not individual options.
+ */
+:host(.picker-column-disabled) ::slotted(ion-picker-column-option) {
+  cursor: default;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+@media (any-hover: hover) {
+  :host(:focus) .picker-opts {
+    outline: none;
+    background: rgba(var(--ion-color-base-rgb), 0.2);
+  }
+}

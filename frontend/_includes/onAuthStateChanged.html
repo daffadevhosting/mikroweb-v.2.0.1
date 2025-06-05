@@ -1,0 +1,48 @@
+<script>
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      const uid = user.uid;
+      const userId = user.uid;
+      const dbRef = firebase.database().ref(`mikrotik_logins/${userId}`);
+
+    dbRef.once('value').then(snapshot => {
+      if (!snapshot.exists()) {
+    const hasRedirected = localStorage.getItem('hasRedirected');
+    if (!hasRedirected) {
+      localStorage.setItem('hasRedirected', 'true');
+      window.location.href = '/add-routers';
+    } else {
+    localStorage.removeItem('hasRedirected'); // Reset kalau data sudah ada
+  }
+      }
+    }).catch(error => {
+      console.error('Gagal cek router:', error);
+      // Kalau error, juga redirect agar user bisa tambah router
+      window.location.href = '/add-routers';
+    });
+
+      firebase.database().ref("users/" + uid + "/isAdmin").once("value")
+        .then(function(snapshot) {
+          const isAdmin = snapshot.val();
+
+          if (isAdmin === true) {
+            console.log("Akses admin disetujui");
+          } else {
+                showToast("Peringatan", "Akses ditolak. Kamu bukan admin.", "warning");
+            firebase.auth().signOut().then(() => {
+              window.location.href = "/403";
+            });
+          }
+        })
+        .catch(function(error) {
+          console.error("Gagal mengambil data admin:", error);
+            showToast("Maaf", "Gagal mengambil data admin: Akses di tolak", "danger");
+          window.location.href = "/403";
+        });
+
+    } else {
+      showToast("Warning", "Silakan login terlebih dahulu.", "warning");
+      window.location.href = "/login";
+    }
+  });
+</script>

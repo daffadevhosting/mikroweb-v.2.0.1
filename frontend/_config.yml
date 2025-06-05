@@ -1,0 +1,33 @@
+port: 1111
+# Site settings
+title: MikroWeb
+description: Mikrotik Hotspot Management.
+baseurl: ""
+url: "http://localhost:8080"
+
+author: nDang
+versi: v.2.0.1
+
+# Markdown settings
+markdown: kramdown
+
+# Sass settings
+sass:
+  add_charset: true
+  sass_dir: assets/sass
+  style: :compressed
+
+# Build settings
+exclude:
+  - package.json
+  - README.md
+  - CNAME
+  - assets/sass
+
+# Plugin settings
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - dotenv
+
+plugins_dir: _plugins

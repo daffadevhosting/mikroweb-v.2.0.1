@@ -1,0 +1,28 @@
+---
+layout: default
+title: Terminal Mikrotik
+permalink: /cliterminal
+---
+
+<script>
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    const userId = user.uid;
+    const dbRef = firebase.database().ref(`mikrotik_logins/${userId}`);
+
+    dbRef.once('value').then(snapshot => {
+      if (!snapshot.exists()) {
+        // Tidak ada router disimpan, redirect ke add-router
+        window.location.href = '/add-routers';
+      }
+    }).catch(error => {
+      console.error('Gagal cek router:', error);
+      // Kalau error, juga redirect agar user bisa tambah router
+      window.location.href = '/add-routers';
+    });
+  } else {
+    // Belum login, redirect ke halaman login
+    window.location.href = '/login';
+  }
+});
+</script>

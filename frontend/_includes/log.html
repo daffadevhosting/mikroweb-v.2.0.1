@@ -1,0 +1,63 @@
+<div class="col-md-4 mb-4">
+    <div class="card bg-dark text-white shadow-lg border-0">
+        <div class="card-body">
+            <h5 class="mb-3">📜 System Logs</h5>
+            <div id="log-container" class="log-box">
+            <ul id="log-list" class="list-group list-group-flush"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#log-container::-webkit-scrollbar 
+{
+ display: none;
+}
+
+.log-box {
+    max-height: 160px;
+    overflow: auto;
+}
+.list-group-item {
+    border: var(--bs-list-group-border-width) solid #5c5c5d !important;
+    background: transparent !important;
+    color: var(--bs-body-bg) !important;
+}
+.list-group-flush
+{
+    border-radius: 8px;
+}
+</style>
+
+<script>
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (user) {
+    const token = await user.getIdToken();
+    fetch("{{site.php_url}}/php/log_view.php", {
+      headers: {
+      'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const logs = data.data;
+        const list = document.getElementById('log-list');
+        logs.slice(0, 30).forEach(log => {
+          const li = document.createElement('li');
+          li.className = 'list-group-item small list-short';
+          li.innerHTML = `<strong>[${log.time}]</strong> <em>${log.topics}</em> - ${log.message}`;
+          list.appendChild(li);
+        });
+      } else {
+        document.getElementById('log-list').innerHTML = `<li class="list-group-item text-danger">${data.message}</li>`;
+      }
+    })
+    .catch(err => {
+      document.getElementById('log-list').innerHTML = `<li class="list-group-item text-danger">Fetch error: ${err}</li>`;
+    });
+  }
+});
+</script>

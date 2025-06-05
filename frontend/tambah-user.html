@@ -1,0 +1,64 @@
+---
+layout: default
+title: Add User
+permalink: /tambah
+---
+
+  <div class="card shadow-lg rounded-4">
+    <div class="card-body">
+      <h3 class="card-title mb-4">🚀 Tambah User Hotspot</h3>
+    <form action="http://localhost:8888/php/add-user.php" method="POST" id="hotspotForm" class="row g-3">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" required placeholder="misal: user123">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Password</label>
+        <input type="text" name="password" class="form-control" required placeholder="misal: pass123">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Profile</label>
+        <input type="text" name="profile" class="form-control" required placeholder="misal: PaketHemat">
+      </div>
+
+	    <div class="col-md-6 mb-3">
+		  <label for="session_timeout" class="form-label">Session Timeout</label>
+		  <input type="text" class="form-control" name="session_timeout" id="session_timeout" placeholder="01:00:00" required>
+		</div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Rate Limit</label>
+        <input type="text" name="rate_limit" class="form-control" required placeholder="misal: 1M/2M">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Shared Users</label>
+        <input type="number" name="shared_users" class="form-control" required value="1" min="1">
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Tambah User</button>
+      </div>
+    </form>
+    <div id="response" class="mt-4 text-center"></div>
+  </div>
+</div>
+
+<script>
+document.getElementById("hotspotForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  fetch(form.action, {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.text())
+  .then(result => {
+    showAlert(result, 'success'); // Tampilkan alert sukses
+    form.reset();
+  })
+  .catch(err => {
+    showAlert("❌ Gagal kirim: " + err, 'danger'); // Tampilkan alert error
+  });
+});
+</script>

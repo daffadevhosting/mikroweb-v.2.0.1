@@ -1,0 +1,130 @@
+<div class="card p-4" style="width: 100dvw; max-width: 380px;">
+  <h5 class="mb-3">Topup User Hotspot</h5>
+
+  <div class="mb-3">
+    <label>User Hotspot</label>
+    <select id="userDropdown" class="form-select"></select>
+  </div>
+
+  <div class="mb-3">
+    <label>User Profile</label>
+    <select id="profileDropdown" class="form-select"></select>
+  </div>
+
+  <div class="mb-3">
+    <label>Hotspot Server</label>
+    <select id="serverDropdown" class="form-select"></select>
+  </div>
+  <div class="mb-3">
+    <label>Harga Sewa</label>
+<input type="text" id="hargaField" class="form-control mt-2" readonly placeholder="Harga otomatis">
+  </div>
+
+  <button class="btn btn-primary" id="topupBtn">Topup Sekarang</button>
+</div>
+<script>
+async function loadDropdownData() {
+  firebase.auth().onAuthStateChanged(async function(user) {
+    if (!user) return;
+    const token = await user.getIdToken();
+
+    const res = await fetch("{{site.php_url}}/php/get_data_topup.php", {
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json"
+      }
+    });
+
+    const text = await res.text();
+    console.log("🔥 Server response:", text);
+
+    const json = JSON.parse(text);
+    if (!json.success) return;
+
+    const { users, profiles, servers } = json.data;
+    const ignoreList = ['default', 'admin', 'default-trial'];
+
+    const priceMap = {};
+
+    // USERS (dari Mikrotik)
+    users?.forEach(u => {
+      if (!ignoreList.includes(u.name.toLowerCase())) {
+        userDropdown.innerHTML += `<option value="${u.name}">${u.name}</option>`;
+      }
+    });
+
+    // SERVERS (dari Mikrotik)
+    servers?.forEach(s => {
+      serverDropdown.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+    });
+
+    // PROFILES (dari Firebase)
+    profiles?.forEach(p => {
+      if (!ignoreList.includes(p.name.toLowerCase())) {
+        profileDropdown.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+        priceMap[p.name] = p.harga;
+      }
+    });
+
+    profileDropdown.addEventListener("change", function() {
+      const selected = profileDropdown.options[profileDropdown.selectedIndex];
+      const name = selected.value;
+      const harga = priceMap[name] || 0;
+      hargaField.value = harga.toLocaleString(); // format harga
+    });
+  });
+}
+
+loadDropdownData();
+</script>
+<script>
+firebase.auth().onAuthStateChanged(async function (user) {
+  if (!user) return;
+
+  const token = await user.getIdToken();
+
+  document.getElementById("topupBtn").addEventListener("click", async function () {
+    const userName = userDropdown.value;
+    const server = serverDropdown.value;
+    const userProfile = profileDropdown.value;
+    const harga = hargaField.value.replace(/\./g, ''); // hilangkan titik ribuan
+
+    if (!userName || !server || !userProfile) {
+      alert("⚠️ Semua field harus diisi!");
+      return;
+    }
+
+    const data = {
+      username: userName.trim().toLowerCase(),
+      server: server,
+      user_profile: userProfile,
+      harga: parseInt(harga),
+    };
+
+    try {
+      const response = await fetch("{{site.php_url}}/php/push_topup.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify(data),
+      });
+
+      const contentType = response.headers.get("Content-Type");
+      const isJson = contentType && contentType.includes("application/json");
+      const result = isJson ? await response.json() : null;
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error(result?.message || "TopUp gagal");
+      }
+
+      alert("✅ Berhasil TopUp untuk " + result.username);
+      showToast("Berhasil", "✅ TopUp user Berhasil!", "success");
+
+    } catch (e) {
+      alert("❌ Error koneksi: " + e.message);
+    }
+  });
+});
+</script>

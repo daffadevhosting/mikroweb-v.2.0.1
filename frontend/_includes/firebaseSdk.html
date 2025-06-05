@@ -6,14 +6,13 @@
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyDUIngXq4cj7XMx6RSOEiNj-aWSjhk0FZ4",
-  authDomain: "lalajo-bokep.firebaseapp.com",
-  databaseURL: "https://lalajo-bokep-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "lalajo-bokep",
-  storageBucket: "lalajo-bokep.firebasestorage.app",
-  messagingSenderId: "243575604544",
-  appId: "1:243575604544:web:5c161c68407947a0b8e6a5",
-  measurementId: "G-QMRXFDSLDN"
+  apiKey: "{{ site.api_key }}",
+  authDomain: "{{ site.auth_domain }}",
+  databaseURL: "{{ site.database_url }}",
+  projectId: "{{ site.project_id }}",
+  storageBucket: "{{ site.storage_bucket }}",
+  messagingSenderId: "{{ site.sender_id }}",
+  appId: "{{ site.app_id }}"
 };
 
   // Inisialisasi Firebase

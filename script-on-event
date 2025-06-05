@@ -1,0 +1,40 @@
+:local dateint do={
+  :local montharray {"jan";"feb";"mar";"apr";"may";"jun";"jul";"aug";"sep";"oct";"nov";"dec"};
+  :local days [:pick $d 4 6];
+  :local month [:pick $d 0 3];
+  :local year [:pick $d 7 11];
+  :local monthint [:find $montharray $month];
+  :set month ($monthint + 1);
+  :if ([:len $month] = 1) do={:set month ("0".$month);}
+  :return [:tonum ($year.$month.$days)];
+}
+
+:local timeint do={
+  :local hours [:pick $t 0 2];
+  :local minutes [:pick $t 3 5];
+  :return ($hours * 60 + $minutes);
+}
+
+:local date [/system clock get date];
+:local time [/system clock get time];
+:local today [$dateint d=$date];
+:local curtime [$timeint t=$time];
+
+:foreach i in=[/ip hotspot user find] do={
+  :local comment [/ip hotspot user get $i comment];
+  :local name [/ip hotspot user get $i name];
+  :if ([:len $comment] >= 19) do={
+    :if ([:pick $comment 2 3] = "/" && [:pick $comment 5 6] = "/") do={
+      :local gettime [:pick $comment 11 16];
+      :local expd [$dateint d=$comment];
+      :local expt [$timeint t=$gettime];
+
+      :if (($expd < $today) or ($expd = $today and $expt < $curtime)) do={
+        /ip hotspot user set $i limit-uptime=1s;
+        :foreach a in=[/ip hotspot active find where user=$name] do={
+          /ip hotspot active remove $a;
+        }
+      }
+    }
+  }
+}

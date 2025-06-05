@@ -1,51 +1,57 @@
 
-<div class="col-md-2 mb-4">
-    <div class="d-flex gap-2 p-2 flex-col card shadow blurry" style="width: 100%;">
-        <div class="glow-ring-card">
-            <h6 class="text-white text-center">Upload</h6>
-            <div class="glow-ring">
-            <div class="ring">
-                <svg width="130" height="130">
-                <circle cx="65" cy="65" r="55" stroke="#2e2e2e" stroke-width="12" fill="none"/>
-                <circle id="ring-upload" cx="65" cy="65" r="55" stroke="#00f7ff" stroke-width="12" fill="none"
-                    stroke-dasharray="345" stroke-dashoffset="345" stroke-linecap="round"/>
-                </svg>
-                <div class="ring-text">
-                <div id="speed-upload">0 Mbps</div>
-                </div>
-            </div>
-            </div>
+<div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+  <div class="glow-box d-flex flex-wrap justify-content-center gap-3 p-3 shadow blurry rounded">
+    
+    <!-- Upload -->
+    <div class="glow-ring-card text-center">
+      <h6 class="text-white">Upload</h6>
+      <div class="glow-ring">
+        <div class="ring">
+          <svg class="ring-svg" viewBox="0 0 130 130">
+            <circle cx="65" cy="65" r="55" stroke="#2e2e2e" stroke-width="12" fill="none" />
+            <circle id="ring-upload" cx="65" cy="65" r="55" stroke="#00f7ff" stroke-width="12" fill="none"
+              stroke-dasharray="345" stroke-dashoffset="345" stroke-linecap="round" />
+          </svg>
+          <div class="ring-text">
+            <div id="speed-upload">0 Mbps</div>
+          </div>
         </div>
-
-        <div class="glow-ring-card">
-            <h6 class="text-white text-center">Download</h6>
-            <div class="glow-ring">
-            <div class="ring">
-                <svg width="130" height="130">
-                <circle cx="65" cy="65" r="55" stroke="#2e2e2e" stroke-width="12" fill="none"/>
-                <circle id="ring-download" cx="65" cy="65" r="55" stroke="#00f7ff" stroke-width="12" fill="none"
-                    stroke-dasharray="345" stroke-dashoffset="345" stroke-linecap="round"/>
-                </svg>
-                <div class="ring-text">
-                <div id="speed-download">0 Mbps</div>
-                </div>
-            </div>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <!-- Download -->
+    <div class="glow-ring-card text-center">
+      <h6 class="text-white">Download</h6>
+      <div class="glow-ring">
+        <div class="ring">
+          <svg class="ring-svg" viewBox="0 0 130 130">
+            <circle cx="65" cy="65" r="55" stroke="#2e2e2e" stroke-width="12" fill="none" />
+            <circle id="ring-download" cx="65" cy="65" r="55" stroke="#00f7ff" stroke-width="12" fill="none"
+              stroke-dasharray="345" stroke-dashoffset="345" stroke-linecap="round" />
+          </svg>
+          <div class="ring-text">
+            <div id="speed-download">0 Mbps</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 <style>
-.glow-ring-wrapper {
-  justify-content: center;
+.glow-box {
+  background-color: #1a1a2e;
+  border-radius: 1rem;
+  box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
 }
 
 .glow-ring-card {
   background: #1e1e2f;
   padding: 1rem;
   border-radius: 1rem;
-  box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
-  max-width: 180px;
-  width: 100%;
+  box-shadow: 0 0 20px rgba(0, 247, 255, 0.2);
+  width: 150px;
+  flex: 0 0 auto;
 }
 
 .glow-ring {
@@ -60,7 +66,9 @@
   height: 130px;
 }
 
-.ring svg {
+.ring-svg {
+  width: 100%;
+  height: auto;
   transform: rotate(-90deg);
 }
 

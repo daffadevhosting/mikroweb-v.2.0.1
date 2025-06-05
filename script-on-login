@@ -1,0 +1,38 @@
+{
+  :local date [ /system clock get date ];                          # Ambil tanggal hari ini
+  :local year [ :pick $date 7 11 ];                                # Ambil tahun (dari string date)
+  :local month [ :pick $date 0 3 ];                                # Ambil bulan dalam huruf (Jan, Feb, dst)
+
+  :local comment [ /ip hotspot user get [find where name="$user"] comment]; # Ambil comment dari user
+  :local ucode [:pick $comment 0 2];                               # Ambil 2 karakter pertama (kalo ada tag khusus)
+
+  :if ($ucode = "up" or $comment = "") do={                        # Kalau belum ada comment yang valid
+    /system scheduler add name="$user" disable=no start-date=$date interval="1d";
+
+    :delay 2s; # Nunggu scheduler kebentuk
+
+    :local exp [ /system scheduler get [find where name="$user"] next-run]; # Ambil waktu next-run scheduler
+
+    :local getxp [len $exp];
+    :if ($getxp = 15) do={                                         # Format panjang (misal: "jun/06 13:05:00")
+      :local d [:pick $exp 0 6];                                   # Ambil tanggal
+      :local t [:pick $exp 7 16];                                  # Ambil jam
+      :local s ("/");
+      :local exp ("$d$s$year $t");                                 # Gabungkan jadi format final
+      /ip hotspot user set comment=$exp [find where name="$user"];
+    };
+
+    :if ($getxp = 8) do={                                          # Format pendek (kalau ada case aneh)
+      /ip hotspot user set comment="$date $exp" [find where name="$user"];
+    };
+
+    :if ($getxp > 15) do={                                         # Kalau format panjang tapi gak pas
+      /ip hotspot user set comment=$exp [find where name="$user"];
+    };
+
+    /system scheduler remove [find where name="$user"];           # Hapus scheduler dummy tadi
+
+    [:local mac $"mac-address";                                   # Set MAC address
+     /ip hotspot user set mac-address=$mac [find where name=$user]];
+  }
+}

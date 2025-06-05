@@ -26,11 +26,18 @@ body {
     .hide-on-mobile {
         display: none;
     }
+    .hide-on-desktop {
+        display: block;
+    }
 
 .login-box {
     min-height: -webkit-fill-available !important;
     }
 }
+
+    .hide-on-desktop {
+        display: none;
+    }
 
 .login-box {
     background-size: cover;
@@ -140,6 +147,42 @@ body {
 .carousel-indicators li {
     cursor: pointer;
 }
+.tech-icons img {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  cursor: pointer;
+  object-fit: contain;
+  filter: drop-shadow(0 0 2px rgba(0,247,255,0.4));
+  transition: transform 0.2s ease;
+}
+
+.tech-icons img:hover {
+  transform: scale(1.1);
+}
+.github-fork-btn {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  background: #24292f;
+  color: white;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,247,255,0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  z-index: 9999;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.github-fork-btn:hover {
+  background: #2f3a4c;
+  transform: scale(1.03);
+}
 </style>
 <section class="body text-white">
     <div class="container">
@@ -171,6 +214,14 @@ body {
                             <div class="text-center">MikroWeb <span class="text-info">{{site.versi}}</span> by {{site.author}}</div>
                         </div>
                     </form>
+                                      <div class="tech-icons mt-3 d-flex justify-content-center gap-3">
+                                        <a href="https://github.com/putridinar/mikroweb-v.2.0.1.git">
+                                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" /></a>
+                                        <a href="https://mikrotik.com/download">
+                                        <img src="https://c0.klipartz.com/pngpicture/391/189/gratis-png-redondo-blanco-y-azul-logo-ilustracion-mikrotik-routeros-computadora-iconos-red-informatica.png" alt="Mikrotik" style="border-radius: 50%;" /></a>
+                                        <a href="https://console.firebase.google.com/">
+                                        <img src="https://www.vectorlogo.zone/logos/firebase/firebase-icon.svg" alt="Firebase" /></a>
+                                    </div>
                 </div>
                 <div class="col-sm-6 hide-on-mobile">
                     <div id="demo" class="carousel slide" data-ride="carousel">
@@ -219,5 +270,14 @@ body {
 <script src="{{ '/assets/js/alert.js' | relative_url }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>
 <script src="{{ '/assets/vendor/bootstrap/bootstrap/dist/js/bootstrap.min.js' | relative_url }}" crossorigin="anonymous"></script>
+<a href="https://github.com/putridinar/mikroweb-v.2.0.1.git" 
+   class="github-fork-btn" 
+   target="_blank" 
+   title="Fork this project on GitHub">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff" viewBox="0 0 16 16">
+    <path d="M5.5 3.5a1.5 1.5 0 1 0-2.001 1.415v2.17a2.5 2.5 0 0 0 1.29 2.18l.71.356V11.5a1.5 1.5 0 1 0 1 0v-1.879l-.71-.356A1.5 1.5 0 0 1 4 7.085v-2.17A1.5 1.5 0 0 0 5.5 3.5zM11 1.5a1.5 1.5 0 1 0 1.001 2.664v3.254a2.5 2.5 0 0 1-1.29 2.18l-.71.356V11.5a1.5 1.5 0 1 0 1 0v-1.546l.71-.356a3.5 3.5 0 0 0 1.58-3.044V4.164A1.5 1.5 0 0 0 11 1.5z"/>
+  </svg>
+  <span>Fork this</span>
+</a>
 </body>
 </html>

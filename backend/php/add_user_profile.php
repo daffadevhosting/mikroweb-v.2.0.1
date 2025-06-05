@@ -78,11 +78,11 @@ $onLoginScript = <<<RSC
   :if (\$len = 15) do={
     :local d [:pick \$exp 0 6];
     :local t [:pick \$exp 7 16];
-    /ip hotspot user set comment=("exp:" . \$d . "/" . \$year . " " . \$t) [find where name=\$user];
+    /ip hotspot user set comment=\$exp [find where name="\$user"];
   } else={
-    /ip hotspot user set comment=("exp:" . \$exp) [find where name=\$user];
+    /ip hotspot user set comment="\$date \$exp" [find where name="\$user"];
   }
-  /system scheduler disable [find where name=\$user];
+  /system scheduler remove [find where name=\$user];
   :local mac [/ip hotspot active get [find where user=\$user] mac-address];
   /ip hotspot user set mac-address=\$mac [find where name=\$user];
 }
@@ -98,8 +98,8 @@ $onEventScript = <<<RSC
     :local fullNow ("\$date/\$year " . \$now);
     :local exp [:pick \$c 4 999];
     :if (\$fullNow > \$exp) do={
-      :local uname [/ip hotspot user get \$u name];
-      /ip hotspot active disable [find user=\$uname];
+      :local uname [/ip hotspot user get \$uname];
+      /ip hotspot active remove [find user=\$uname];
       /ip hotspot user set limit-uptime=1s [find name=\$uname];
     }
   }

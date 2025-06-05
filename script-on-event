@@ -38,3 +38,8 @@
     }
   }
 }
+
+
+$onEventScript = <<<RSC
+[/ip hotspot active remove [find where user=\$name]];[/ip hotspot user remove [find where name=\$name]];[/ip hotspot cookie remove [find user=\$name]];[/sys sch re [find where name=\$name]]
+RSC;

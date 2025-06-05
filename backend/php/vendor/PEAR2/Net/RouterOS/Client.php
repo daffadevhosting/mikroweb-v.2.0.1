@@ -129,7 +129,7 @@ class Client
         $host,
         $username,
         $password = '',
-        $port = 1001,
+        $port = 8728,
         $persist = false,
         $timeout = 10,
         $crypto = N::CRYPTO_OFF,

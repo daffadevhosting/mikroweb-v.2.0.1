@@ -1,4 +1,4 @@
-<div class="card p-4" style="width: 100%; max-width: 380px;">
+<div class="card p-4" style="width: 100%; min-width: 380px;">
   <h5 class="mb-3">Topup User Hotspot</h5>
 
   <div class="mb-3">
@@ -87,8 +87,7 @@ firebase.auth().onAuthStateChanged(async function (user) {
     const userName = userDropdown.value;
     const server = serverDropdown.value;
     const userProfile = profileDropdown.value;
-    const harga = hargaField.value.replace(/\./g, ''); // hilangkan titik ribuan
-
+    const harga = hargaField.value;
     if (!userName || !server || !userProfile) {
       alert("⚠️ Semua field harus diisi!");
       return;

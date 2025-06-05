@@ -111,34 +111,46 @@ function formatDate(date) {
 
 async function fetchPendapatan() {
   const today = formatDate(new Date());
-  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-  const startMonthStr = startOfMonth.toISOString().slice(0, 10);
+  const startOfMonth = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 
-  // Misal struktur: /transactions/{transactionId} dengan field "date" (YYYY-MM-DD) dan "amount"
-  
-  // Pendapatan Harian
   let pendapatanHarian = 0;
-  await db.ref('transactions').orderByChild('date').equalTo(today).once('value', snapshot => {
-    snapshot.forEach(tx => {
-      pendapatanHarian += Number(tx.val().amount || 0);
-    });
-  });
-
-  // Pendapatan Bulanan
   let pendapatanBulanan = 0;
-  await db.ref('transactions').orderByChild('date').startAt(startMonthStr).once('value', snapshot => {
-    snapshot.forEach(tx => {
-      pendapatanBulanan += Number(tx.val().amount || 0);
+
+  const snapshot = await db.ref('topup_logs').once('value');
+  if (!snapshot.exists()) return { pendapatanHarian, pendapatanBulanan };
+
+  snapshot.forEach(userSnap => {
+    userSnap.forEach(topupSnap => {
+      const data = topupSnap.val();
+      const tanggal = data.tanggal?.slice(0, 10); // Ambil "YYYY-MM-DD"
+      const harga = Number(data.harga || 0);
+
+      if (tanggal === today) {
+        pendapatanHarian += harga;
+      }
+
+      if (tanggal >= startOfMonth) {
+        pendapatanBulanan += harga;
+      }
     });
   });
 
   return { pendapatanHarian, pendapatanBulanan };
 }
+firebase.auth().onAuthStateChanged(async user => {
+  if (!user) return;
 
+  const token = await user.getIdToken();
+  const userRoleSnap = await db.ref(`users/${user.uid}/role`).once('value');
+  const role = userRoleSnap.val();
+
+  if (role === 'admin') {
 fetchPendapatan().then(({pendapatanHarian, pendapatanBulanan}) => {
   document.getElementById('daily-income').textContent = pendapatanHarian.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
   document.getElementById('monthly-income').textContent = pendapatanBulanan.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
 });
   }
+  });
+}
 });
 </script>

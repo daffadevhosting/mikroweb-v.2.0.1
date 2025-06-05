@@ -12,8 +12,12 @@ canvas {
 .card-title {
   font-weight: 600;
 }
-.download-ring.glow, .upload-ring.glow {
+.upload-ring.glow {
   box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+  transition: box-shadow 0.3s;
+}
+.download-ring.glow {
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
   transition: box-shadow 0.3s;
 }
 </style>
@@ -84,8 +88,8 @@ function updateSpeed(upload, download) {
   const dRing = document.querySelector(".download-ring");
   const uRing = document.querySelector(".upload-ring");
 
-  dRing.classList.toggle("glow", download > 10);
-  uRing.classList.toggle("glow", upload > 5);
+  dRing.classList.toggle("glow", download > 5);
+  uRing.classList.toggle("glow", upload > 3);
 }
 
 function getTimeLabel() {
@@ -129,5 +133,5 @@ setInterval(() => {
     console.error("Fetch error:", error);
     document.getElementById("status").innerText = "Gagal ambil data";
   });
-}, 1000000);
+}, 1500);
 </script>

@@ -1,121 +1,180 @@
 <div class="modal fade" id="modalHargaProfile" tabindex="-1" aria-labelledby="modalHargaProfile" aria-hidden="true">
   <div class="modal-dialog">
-<form id="formTambahPaket" class="modal-content bg-dark text-white">
-  <div class="modal-header">
-    <h5 class="modal-title">Tambah Paket Hotspot</h5>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-  </div>
-  <div class="modal-body">
-    <div class="mb-2">
-      <label for="namaPaket" class="form-label">Nama Paket</label>
-      <input type="text" class="form-control" id="namaPaket" name="nama_paket" required>
-    </div>
 
-    <div class="mb-2">
-      <label for="userProfile" class="form-label">User-Profile (Mikrotik)</label>
-      <select class="form-select" id="userProfile" name="user-profile" required>
-        <option value="">Pilih Profile...</option>
-        <!-- Nanti diisi via JS fetch dari Mikrotik -->
-      </select>
-    </div>
+  <div id="myloadingSpinner" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status"></div>
+    <div>Memuat data profile...</div>
+  </div>
+  <div class="table-responsive">
+  <table class="table d-none" id="myprofileTable">
+      <thead id="mythead" class="table text-light d-none">
+        <tr>
+          <th>#no.</th>
+          <th>Nama Profile</th>
+          <th>Rate Limit</th>
+          <th>Shared Users</th>
+          <th>Session Timeout</th>
+          <th>Harga (Rp)</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+    <tbody id="profileTable"></tbody>
+  </table>
+</div>
+  <nav>
+    <ul class="pagination justify-content-center mt-3" id="paginate"></ul>
+  </nav>
 
-    <div class="mb-2">
-      <label for="hargaPaket" class="form-label">Harga Paket (Rp)</label>
-      <input type="number" class="form-control" id="hargaPaket" name="harga" min="0" required>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Simpan Paket</button>
-  </div>
-</form>
 <script>
-document.getElementById('formTambahPaket').addEventListener('submit', async function (e) {
-  e.preventDefault();
+const fbpageSize = 10;
+let fbcurrentPage = 1;
+let allProfilesfb = [];
+
+async function loadmyProfiles() {
+  spinner(true);
 
   const user = firebase.auth().currentUser;
+  if (!user) return;
+
   const idToken = await user.getIdToken();
+  const response = await fetch('{{site.php_url}}/php/get_profilesUser.php', {
+    headers: {
+      'Authorization': 'Bearer ' + idToken,
+      'Content-Type': 'application/json'
+    }
+  });
 
-  const namaPaket = document.getElementById('namaPaket').value;
-  const userProfile = document.getElementById('userProfile').value;
-  const harga = document.getElementById('hargaPaket').value;
+  const result = await response.json();
+  if (!result.success) {
+    showToast("Gagal", "Gagal ambil data: " + result.message, "error");
+    spinner(false);
+    return;
+  }
 
-const res = await fetch('{{site.php_url}}/php/add_paket.php', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + idToken
-  },
-  body: JSON.stringify({ namaPaket, userProfile, harga })
-});
+  allProfiles = (result.data || []).filter(p => p && p.name);
+  rendermyProfiles();
 
-const text = await res.text();
-console.log('Raw response:', text);
-
-let data = {};
-try {
-  data = JSON.parse(text);
-} catch (e) {
-  console.error('Gagal parsing JSON:', e);
-  showToast('Gagal parsing response dari server!');
-  return;
+  spinner(false);
 }
 
-if (!data.success) {
-  showToast(`Gagal menambah paket: ${data.message || 'Unknown error'}`);
-} else {
-  showToast('Berhasil', 'Paket berhasil ditambahkan!', 'success');
-  document.getElementById('formTambahPaket').reset();
+function spinner(isLoading) {
+  document.getElementById('myloadingSpinner').classList.toggle('d-none', !isLoading);
+  document.getElementById('myprofileTable').classList.toggle('d-none', isLoading);
+  document.getElementById('mythead').classList.toggle('d-none', isLoading);
 }
-});
 
-let userProfilesLoaded = false;
+const myignoreList = ['default', 'admin', 'default-trial'];
 
-async function loadUserProfiles() {
-  if (userProfilesLoaded) return;
+function rendermyProfiles() {
+  const start = (fbcurrentPage - 1) * fbpageSize;
+  const end = start + fbpageSize;
+  const pageItems = allProfilesfb.slice(start, end);
+  const tbody = document.getElementById('profileTable');
+  tbody.innerHTML = "";
 
-  try {
+  pageItems.forEach((p, i) => {
+    if (!p.name || myignoreList.includes(p.name.toLowerCase())) return;
+
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+      <td>${start + i + 1}</td>
+      <td>${p.name || '-'}</td>
+      <td>${p.rate_limit || '-'}</td>
+      <td>${p.session_timeout || '-'}</td>
+      <td>${p.shared_users || '-'}</td>
+      <td>${p.price ? 'Rp ' + p.price.toLocaleString() : '-'}</td>
+      <td>
+        <button class="btn btn-sm btn-warning me-1" onclick="editProfile('${p.name}')">
+          <i class="bi bi-pencil-square"></i>
+        </button>
+        <button class="btn btn-danger btn-sm btn-delete" data-id="${p.keyId}" data-name="${p.name}">
+          <i class="bi bi-trash3"></i>
+        </button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  renderPaginate();
+}
+
+function editmyProfile(name) {
+  showToast('Perhatian', 'Edit belum diimplementasi di UI. (backend sudah siap)', 'warning');
+}
+
+let myselectedProfile = null;
+
+function myDeleteConfirm(keyId, name) {
+  myselectedProfile = { keyId, name };
+  document.getElementById('globalConfirmMessage').textContent = `Yakin ingin hapus profile "${name}"?`;
+  new bootstrap.Modal(document.getElementById('globalConfirm')).show();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-delete');
+    if (!btn) return;
+
+    const keyId = btn.getAttribute('data-id');
+    const name = btn.getAttribute('data-name');
+    myDeleteConfirm(keyId, name);
+  });
+
+  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+    if (!myselectedProfile) return;
+
     const user = firebase.auth().currentUser;
-    if (!user) throw new Error("User belum login");
+    const token = await user.getIdToken();
 
-    const idToken = await user.getIdToken();
-
-    const res = await fetch('{{site.php_url}}/php/get_user_profiles.php', {
-      method: 'GET',
+    const response = await fetch('{{site.php_url}}/php/deleteProfiles.php', {
+      method: 'POST',
       headers: {
-      'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + idToken
-      }
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ '.id': selectedProfile.keyId })
     });
 
-    if (!res.ok) throw new Error('Unauthorized');
+    const result = await response.json();
 
-    const prof = await res.json();
-    const select = document.getElementById('userProfile');
-    const ignoreList = ['default', 'admin', 'default-trial'];
+    if (result.success) {
+      showToast('Sukses', '✅ Profile berhasil dihapus', 'success');
+      setTimeout(() => {
+        loadmyProfiles();
+      }, 1000);
+    } else {
+      showToast('Gagal', result.message || 'Gagal menghapus profile', 'error');
+    }
 
-    select.innerHTML = '<option value="">Pilih Profile...</option>';
+    myselectedProfile = null;
+    bootstrap.Modal.getInstance(document.getElementById('globalConfirm')).hide();
+  });
+});
 
-    prof
-      .filter(p => p.name && !ignoreList.includes(p.name.toLowerCase()))
-      .forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.name;
-        opt.textContent = p.name + (p.rate_limit ? ` (${p.rate_limit})` : '');
-        select.appendChild(opt);
-      });
+function renderPaginate() {
+  const totalPages = Math.ceil(allProfilesfb.length / fbpageSize);
+  const paginate = document.getElementById('paginate');
+  paginate.innerHTML = '';
 
-    userProfilesLoaded = true;
-    showToast('Modal BS alert', 'Berhasil memuat user-profiles dari Mikrotik!', 'success');
-
-  } catch (err) {
-    console.error('Gagal ambil profile:', err);
-    showToast('Modal BS alert', 'Gagal memuat user-profiles dari Mikrotik!', 'danger');
+  for (let i = 1; i <= totalPages; i++) {
+    const li = document.createElement('li');
+    li.className = `page-item ${i === fbcurrentPage ? 'active' : ''}`;
+    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+    li.addEventListener('click', function (e) {
+      e.preventDefault();
+      fbcurrentPage = i;
+      rendermyProfiles();
+    });
+    paginate.appendChild(li);
   }
 }
 
-// Panggil saat modal dibuka (biar selalu fresh)
-// Ini yang benar
-document.getElementById('modalHargaProfile').addEventListener('show.bs.modal', loadUserProfiles);
+firebase.auth().onAuthStateChanged(user => {
+  if (user) loadmyProfiles();
+});
 </script>
+
   </div>
 </div>

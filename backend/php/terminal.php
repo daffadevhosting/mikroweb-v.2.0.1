@@ -20,7 +20,7 @@ use PEAR2\Net\RouterOS;
 header('Content-Type: application/json');
 
 
-// Ambil token dari header Authorization: Bearer ...
+// Ambil token dari Bearer ...
 $headers = getallheaders();
 $authHeader = $headers['Authorization'] ?? '';
 if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {

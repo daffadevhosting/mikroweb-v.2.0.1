@@ -61,21 +61,22 @@ try {
 
     // === [4] Ambil Server Hotspot ===
     $servers = [];
-    $resServers = $client->sendSync(new Request('/ip/hotspot/print'));
+    $resServers = $client->sendSync(new Request('/ip/hotspot/profile/print'));
     foreach ($resServers as $item) {
         if ($item->getType() === Response::TYPE_DATA) {
             $servers[] = ['name' => $item->getProperty('name')];
         }
     }
 
-    // === [5] Ambil Paket dari Firebase ===
-    $plans = $database->getReference("hotspot_plans/{$uid}")->getValue();
+    // === [5] Ambil Paket Profile ===
     $profiles = [];
-    foreach ($plans ?? [] as $plan) {
-        if (!empty($plan["user_profile"])) {
+    $resProfiles = $client->sendSync(new Request('/ip/hotspot/user/profile/print'));
+    foreach ($resProfiles as $item) {
+        if ($item->getType() === Response::TYPE_DATA) {
             $profiles[] = [
-                "name" => $plan["user_profile"],
-                "harga" => $plan["harga"] ?? 0
+                'name' => $item->getProperty('name'),
+                'rate_limit' => $item->getProperty('rate-limit'),
+                'session_timeout' => $item->getProperty('session-timeout'),
             ];
         }
     }

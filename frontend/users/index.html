@@ -58,7 +58,7 @@ permalink: /users
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-bg-dark">
-      <form id="formAddUser">
+      <form id="addUserForm">
         <div class="modal-header">
           <h5 class="modal-title" id="modalAddUserLabel">Tambah User Hotspot</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
@@ -72,30 +72,13 @@ permalink: /users
             <label for="password" class="form-label">Password</label>
             <input type="text" id="pasSWord" class="form-control" name="password" required>
           </div>
-          <div class="mb-3">
-            <label for="profile" class="form-label">Profile</label>
-            <input type="text" id="proFile" class="form-control" name="profile" value="default" required>
-          </div>
-          <div class="mb-3">
-            <label for="session_timeout" class="form-label">Session Timeout (jam)</label>
-            <input type="number" id="sessionTimeout" class="form-control" name="session_timeout" value="1" min="1">
-          </div>
-          <div class="mb-3">
-            <label for="rate_limit" class="form-label">Rate Limit (Download/Upload)</label>
-            <input type="text" id="rateLimit" class="form-control" name="rate_limit" value="1M/1M">
-          </div>
-          <div class="mb-3">
-            <label for="shared_users" class="form-label">Shared Users</label>
-            <input type="number" id="sharedUsers" class="form-control" name="shared_users" value="1" min="1">
-          </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Tambah User</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Tambah User</button>
         </div>
       </form>
 <script>
-document.getElementById('formAddUser').addEventListener('submit', async function(e) {
+document.getElementById('addUserForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
   const user = firebase.auth().currentUser;
@@ -124,21 +107,11 @@ document.getElementById('formAddUser').addEventListener('submit', async function
 
     // 🔁 Siapkan data user dan router
     const payload = {
-      token: token,
       username: document.getElementById("useRName").value,
-      password: document.getElementById("pasSWord").value,
-      profile: document.getElementById("proFile").value,
-      rate_limit: document.getElementById("rateLimit").value,
-      session_timeout: document.getElementById("sessionTimeout").value,
-      shared_users: document.getElementById("sharedUsers").value,
-      router: {
-        ip: defaultRouter.ip,
-        username: defaultRouter.username,
-        password: defaultRouter.password
-      }
+      password: document.getElementById("pasSWord").value
     };
 
-    const response = await fetch('{{site.php_url}}/php/add_user.php', {
+    const response = await fetch('{{site.php_url}}/php/save_to_firebase.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + token },
@@ -149,9 +122,7 @@ document.getElementById('formAddUser').addEventListener('submit', async function
     showToast(result.success ? "Sukses" : "Gagal", result.message, result.success ? "success" : "error");
 
     if (result.success) {
-      this.reset();
-      const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddUser'));
-      modal.hide();
+      document.getElementById('addUserForm').reset();
     }
 
   } catch (err) {

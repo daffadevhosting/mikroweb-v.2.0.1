@@ -1,0 +1,123 @@
+---
+layout: none
+title: User Profile
+permalink: /user-profile
+---
+
+
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: page.lang | default: 'id | ID' }}">
+
+  {% include head.html %}
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="mb-4">Tambah User Profile Hotspot</h2>
+    <form id="profileForm" class="card p-4 shadow-sm">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Nama Profile</label>
+          <input type="text" name="name" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Shared Users</label>
+          <input type="number" name="sharedusers" class="form-control" value="1" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Rate Limit (Download/Upload)</label>
+          <input type="text" name="ratelimit" class="form-control" placeholder="2M/2M" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Address Pool</label>
+          <input type="text" name="ppool" class="form-control" value="default-dhcp">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Masa Aktif</label>
+          <input type="text" name="validity" class="form-control" placeholder="7d" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Grace Period</label>
+          <input type="text" name="graceperiod" class="form-control" placeholder="1h">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Harga</label>
+          <input type="number" name="price" class="form-control" value="0">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Harga S</label>
+          <input type="number" name="sprice" class="form-control" value="0">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Parent Queue</label>
+          <input type="text" name="parent" class="form-control" value="none">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Expiration Mode</label>
+          <select name="expmode" class="form-select">
+            <option value="0">Tidak ada</option>
+            <option value="rem">Remove user</option>
+            <option value="ntf">Set limit-uptime</option>
+            <option value="remc">Remove + catat</option>
+            <option value="ntfc">Limit + catat</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Lock MAC Address</label>
+          <select name="lockunlock" class="form-select">
+            <option value="Disable">Disable</option>
+            <option value="Enable">Enable</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-4 w-100">Tambah Profile</button>
+    </form>
+
+    <div id="response" class="mt-3"></div>
+  </div>
+
+  <script>
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (user) {
+    const token = await user.getIdToken();
+    document.getElementById('profileForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const idToken = await user.getIdToken();
+      if (!idToken) {
+        alert('Belum login!');
+        return;
+      }
+
+      try {
+        const res = await fetch('{{site.php_url}}/php/add-user-profile.php', {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + idToken,
+            'Content-Type': 'application/json'
+          },
+          body: formData
+        });
+
+        const data = await res.text();
+        document.getElementById('response').innerHTML = `<pre>${data}</pre>`;
+      } catch (err) {
+        console.error(err);
+        alert('Gagal kirim request');
+      }
+    });
+}
+});
+    </script>
+</body>
+</html>

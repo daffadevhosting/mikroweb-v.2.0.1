@@ -61,17 +61,6 @@ try {
         throw new Exception("Semua field wajib diisi");
     }
 
-    // === [4] Ambil Data Paket dari Firebase ===
-    $plans = $database->getReference("hotspot_plans/{$uid}")->getValue();
-    $paket = null;
-    foreach ($plans as $plan) {
-        if ($plan['user_profile'] === $user_profile) {
-            $paket = $plan;
-            break;
-        }
-    }
-    if (!$paket) throw new Exception("Paket '{$user_profile}' tidak ditemukan");
-
     $masaAktif = $paket['masa_aktif'] ?? 1;
     $jenis = strtolower($paket['jenis_paket'] ?? 'time');
     $limit = $jenis === 'time' ? ($paket['time_limit'] ?? '1h') : ($paket['quota_limit'] ?? '100M');
@@ -107,15 +96,17 @@ try {
     // === [7] Tambah Scheduler untuk Expired ===
     $expireDate = date("M/d/Y", strtotime("+{$masaAktif} days"));
     $scriptName = "exp-{$usernameHotspot}";
-    $scriptBody = "/ip hotspot active remove [find where user=\"{$usernameHotspot}\"]";
-    $scriptBody = "/ip hotspot user disable [find where name=\"{$usernameHotspot}\"]";
-    $scriptBody = "/ip hotspot cookie remove [find user=\"{$usernameHotspot}\"]";
-    $scriptBody = "/sys sch re [find where name=\"{$usernameHotspot}\"]";
+    $scriptBody = <<<SCR
+/ip hotspot active remove [find where user="{$usernameHotspot}"];
+/ip hotspot user disable [find where name="{$usernameHotspot}"];
+/ip hotspot cookie remove [find user="{$usernameHotspot}"];
+/system scheduler remove [find where name="{$scriptName}"];
+SCR;
 
     $client->sendSync((new RouterOS\Request('/system/scheduler/add'))
         ->setArgument('name', $scriptName)
         ->setArgument('start-date', $expireDate)
-        ->setArgument('interval', '20s')
+        ->setArgument('interval', '1d')
         ->setArgument('on-event', $scriptBody));
 
     // === [8] Simpan Log ke Firebase ===

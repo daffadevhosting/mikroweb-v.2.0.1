@@ -15,10 +15,6 @@
     <label>Hotspot Server</label>
     <select id="serverDropdown" class="form-select"></select>
   </div>
-  <div class="mb-3">
-    <label>Harga Sewa</label>
-<input type="text" id="hargaField" class="form-control mt-2" readonly placeholder="Harga otomatis">
-  </div>
 
   <button class="btn btn-primary" id="topupBtn">Topup Sekarang</button>
 </div>
@@ -44,7 +40,6 @@ async function loadDropdownData() {
     const { users, profiles, servers } = json.data;
     const ignoreList = ['default', 'admin', 'default-trial'];
 
-    const priceMap = {};
 
     // USERS (dari Mikrotik)
     users?.forEach(u => {
@@ -58,19 +53,11 @@ async function loadDropdownData() {
       serverDropdown.innerHTML += `<option value="${s.name}">${s.name}</option>`;
     });
 
-    // PROFILES (dari Firebase)
+    // PROFILES (dari Mikrotik)
     profiles?.forEach(p => {
       if (!ignoreList.includes(p.name.toLowerCase())) {
         profileDropdown.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-        priceMap[p.name] = p.harga;
       }
-    });
-
-    profileDropdown.addEventListener("change", function() {
-      const selected = profileDropdown.options[profileDropdown.selectedIndex];
-      const name = selected.value;
-      const harga = priceMap[name] || 0;
-      hargaField.value = harga.toLocaleString(); // format harga
     });
   });
 }
@@ -87,9 +74,8 @@ firebase.auth().onAuthStateChanged(async function (user) {
     const userName = userDropdown.value;
     const server = serverDropdown.value;
     const userProfile = profileDropdown.value;
-    const harga = hargaField.value;
     if (!userName || !server || !userProfile) {
-      alert("⚠️ Semua field harus diisi!");
+      showToast("⚠️", "Semua field harus diisi!", "warning");
       return;
     }
 
@@ -97,7 +83,6 @@ firebase.auth().onAuthStateChanged(async function (user) {
       username: userName.trim().toLowerCase(),
       server: server,
       user_profile: userProfile,
-      harga: parseInt(harga),
     };
 
     try {

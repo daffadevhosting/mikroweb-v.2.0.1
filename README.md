@@ -10,7 +10,7 @@ MikroWeb adalah sistem dashboard hotspot berbasis **MikroTik RouterOS** yang ter
 
 - 🔐 Login dengan Firebase Auth
 - 📡 Integrasi Mikrotik API (PEAR2 RouterOS Client)
-- 💳 Topup user langsung dari dashboard (enable user expipred)
+- 💳 Topup user langsung dari dashboard (enable user expired)
 - 📜 Scheduler otomatis: disable user setelah masa aktif habis
 - ✅ Tidak perlu generate Voucher / Print / Kertas
 - 📈 Statistik penggunaan dan income harian/bulanan
@@ -44,7 +44,7 @@ MikroWeb adalah sistem dashboard hotspot berbasis **MikroTik RouterOS** yang ter
 └── README.md
 ```
 ### Bonus template login hotspot mikrotik nonvoucher
-| Dashboard Admin |
+|  Login hotspot  |
 |-----------------|
 | ![](/hotspot/img/WiFiLogin.png) |
 

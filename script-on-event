@@ -31,7 +31,7 @@
 
       :if (($expd < $today) or ($expd = $today and $expt < $curtime)) do={
         /ip hotspot user set $i limit-uptime=1s;
-        :foreach a in=[/ip hotspot active find where user=$name] do={
+        :foreach a in=[/ip hotspot active find where user=\$user] do={
           /ip hotspot active remove $a;
         }
       }
@@ -41,5 +41,5 @@
 
 
 $onEventScript = <<<RSC
-[/ip hotspot active remove [find where user=\$name]];[/ip hotspot user remove [find where name=\$name]];[/ip hotspot cookie remove [find user=\$name]];[/sys sch re [find where name=\$name]]
+[/ip hotspot active remove [find where user=\$user]];[/ip hotspot user disable [find where name=\$name]];[/ip hotspot cookie remove [find user=\$user]];[/sys sch re [find where name=\$name]]
 RSC;

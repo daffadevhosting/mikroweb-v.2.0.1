@@ -1,0 +1,44 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />   
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="-1">
+<title>Internet hotspot - Log out</title>
+<link rel="stylesheet" href="css/style.css">
+<script>
+    function openLogin() {
+	if (window.name != 'hotspot_logout') return true;
+	open('$(link-login)', '_blank', '');
+	window.close();
+	return false;
+    }
+</script>
+</head>
+
+<body>
+    <div class="ie-fixMinHeight">
+        <div class="main">
+            <div class="wrap">
+                <h1>You have just logged out!</h1> 
+                <table>  
+                    <tr><td>Username</td><td>$(username)</td></tr>
+                    <tr><td>IP address</td><td>$(ip)</td></tr>
+                    <tr><td>MAC address</td><td>$(mac)</td></tr>
+                    <tr><td>Session time</td><td>$(uptime)</td></tr>
+                    $(if session-time-left)
+                    <tr><td>Time left</td><td>$(session-time-left)</td></tr>
+                    $(endif)
+                    <tr><td>Bytes up / down:</td><td>$(bytes-in-nice) / $(bytes-out-nice)</td></tr>
+                </table>
+
+
+                <form action="$(link-login)" name="login" onSubmit="return openLogin()">
+                <input type="submit" value="Log in">
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

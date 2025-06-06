@@ -106,13 +106,16 @@ try {
 
     // === [7] Tambah Scheduler untuk Expired ===
     $expireDate = date("M/d/Y", strtotime("+{$masaAktif} days"));
-    $scriptName = "expire-{$usernameHotspot}";
-    $scriptBody = "/ip hotspot user disable [find name=\"{$usernameHotspot}\"]";
+    $scriptName = "exp-{$usernameHotspot}";
+    $scriptBody = "/ip hotspot active remove [find where user=\"{$usernameHotspot}\"]";
+    $scriptBody = "/ip hotspot user disable [find where name=\"{$usernameHotspot}\"]";
+    $scriptBody = "/ip hotspot cookie remove [find user=\"{$usernameHotspot}\"]";
+    $scriptBody = "/sys sch re [find where name=\"{$usernameHotspot}\"]";
 
     $client->sendSync((new RouterOS\Request('/system/scheduler/add'))
         ->setArgument('name', $scriptName)
         ->setArgument('start-date', $expireDate)
-        ->setArgument('interval', '1d')
+        ->setArgument('interval', '20s')
         ->setArgument('on-event', $scriptBody));
 
     // === [8] Simpan Log ke Firebase ===

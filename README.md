@@ -12,9 +12,11 @@ MikroWeb adalah sistem dashboard hotspot berbasis **MikroTik RouterOS** yang ter
 - 📡 Integrasi Mikrotik API (PEAR2 RouterOS Client)
 - 💳 Topup user langsung dari dashboard (enable user expipred)
 - 📜 Scheduler otomatis: disable user setelah masa aktif habis
+- ✅ Tidak perlu generate Voucher / Print / Kertas
 - 📈 Statistik penggunaan dan income harian/bulanan
 - 🛠️ Settings Router, Paket Hotspot, dan Bandwidth
 - 📁 Struktur folder rapi dan terpisah (modular)
+- PPPoE (soon)
 
 ---
 
@@ -41,6 +43,12 @@ MikroWeb adalah sistem dashboard hotspot berbasis **MikroTik RouterOS** yang ter
 ├── .env
 └── README.md
 ```
+### Bonus template login hotspot mikrotik nonvoucher
+| Dashboard Admin |
+|-----------------|
+| ![](/hotspot/img/WiFiLogin.png) |
+
+
 ##  ✅ Script Lengkap (Gabungan)
 
 ### script on-login yang dipakai.
@@ -144,11 +152,11 @@ Kalau kamu mau bikin hanya 1 scheduler global untuk semua profile (bukan per pro
 
 | Dashboard Admin | User List |
 |-----------------|------------|
-| ![](/frontend/dashboard.png) | ![](/frontend/users.png) |
+| ![](/frontend/assets/images/dashboard.png) | ![](/frontend/assets/images/users.png) |
 
-| Dashboard Mobile | User Mobile |
+| Dash Mobile | User Mobile |
 |-----------------|------------|
-| ![](/frontend/mobiledashboard.png) | ![](/frontend/mobileusers.png) |
+| ![](/frontend/assets/images/mobiledashboard.png) | ![](/frontend/assets/images/mobileusers.png) |
 
 ---
 

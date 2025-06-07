@@ -88,8 +88,10 @@ try {
 
     // === [6] Update Profile User ===
     $client->sendSync((new Request('/ip/hotspot/user/set'))
+        ->setArgument('server', $server)
         ->setArgument('.id', $userId)
         ->setArgument('profile', $user_profile)
+        ->setArgument('comment', '') // Kosongkan komentar
         ->setArgument('disabled', 'no')
     );
 
@@ -97,10 +99,11 @@ try {
     $expireDate = date("M/d/Y", strtotime("+{$masaAktif} days"));
     $scriptName = "exp-{$usernameHotspot}";
     $scriptBody = <<<SCR
-/ip hotspot active remove [find where user="{$usernameHotspot}"];
-/ip hotspot user disable [find where name="{$usernameHotspot}"];
-/ip hotspot cookie remove [find user="{$usernameHotspot}"];
-/system scheduler remove [find where name="{$scriptName}"];
+[/ip hotspot active remove [find where user={$usernameHotspot}]];
+[/ip hotspot user disable [find where name={$usernameHotspot}]];
+[/ip hotspot cookie remove [find user={$usernameHotspot}]];
+[/system scheduler remove [find where name={$scriptName}]];
+[/sys sch re [find where name={$usernameHotspot}]]
 SCR;
 
     $client->sendSync((new RouterOS\Request('/system/scheduler/add'))
@@ -115,7 +118,7 @@ SCR;
         "username" => $usernameHotspot,
         "server" => $server,
         "user_profile" => $user_profile,
-        "harga" => (float)$harga,
+        "price" => (float)$price,
         "masa_aktif" => $masaAktif,
         "jenis_paket" => $jenis,
         "limit" => $limit,
@@ -129,6 +132,7 @@ SCR;
         "message" => "TopUp berhasil",
         "username" => $usernameHotspot,
         "profile" => $user_profile,
+        "server" => $server,
     ]);
     exit;
 

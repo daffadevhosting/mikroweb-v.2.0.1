@@ -3,9 +3,9 @@ port: 1111
 title: MikroWeb
 description: Mikrotik Hotspot Management.
 baseurl: ""
-url: "http://localhost:8080"
+url: "http://localhost:1111"
 
-author: nDang
+author: Putri Dinar
 versi: v.2.0.1
 
 # Markdown settings
@@ -13,7 +13,6 @@ markdown: kramdown
 
 # Sass settings
 sass:
-  add_charset: true
   sass_dir: assets/sass
   style: :compressed
 

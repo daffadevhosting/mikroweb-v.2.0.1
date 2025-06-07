@@ -32,7 +32,7 @@ $idToken = $matches[1];
 // Verifikasi token dan ambil UID user
 $user = verifyFirebaseToken($idToken);
 if (!$user) {
-    echo json_encode(["success" => false, "error" => "Token tidak valid atau expired"]);
+    echo json_encode(["success" => false, "error" => "Token tidak valid atau sudah expired"]);
     exit;
 }
 $uid = $user['uid'];

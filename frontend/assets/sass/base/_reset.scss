@@ -1,0 +1,20 @@
+:root {
+    --card-dark-bg: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
+    --blur: rgba(218, 218, 218, 0.212);
+    --red-blur: rgba(255, 0, 0, 0.300);
+    --blue-blur: rgba(0, 0, 255, 0.300);
+    --green-blur: rgba(0, 175, 0, 0.300);
+    --yellow-blur: rgba(255, 255, 0, 0.300);
+    --bs-primary: #0004ff;
+    --bs-light: #f8f9fa;
+    --bs-border-radius: 0.5rem;
+    --custom-spacing: 1.5rem;
+}
+
+.card {
+    background: var(--card-dark-bg);
+    color: var(--bs-light);
+    padding: var(--custom-spacing);
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-primary);
+}

@@ -55,13 +55,15 @@ try {
     $resUsers = $client->sendSync(new Request('/ip/hotspot/user/print'));
     foreach ($resUsers as $item) {
         if ($item->getType() === Response::TYPE_DATA) {
-            $users[] = ['name' => $item->getProperty('name')];
+            $users[] = ['name' => $item->getProperty('name'),
+                        'limit_uptime' => $item->getProperty('limit-uptime')
+                    ];
         }
     }
 
     // === [4] Ambil Server Hotspot ===
     $servers = [];
-    $resServers = $client->sendSync(new Request('/ip/hotspot/profile/print'));
+    $resServers = $client->sendSync(new Request('/ip/hotspot/print'));
     foreach ($resServers as $item) {
         if ($item->getType() === Response::TYPE_DATA) {
             $servers[] = ['name' => $item->getProperty('name')];

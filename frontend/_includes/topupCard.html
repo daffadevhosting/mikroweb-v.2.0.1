@@ -102,9 +102,9 @@ firebase.auth().onAuthStateChanged(async function (user) {
       if (!response.ok || !result || !result.success) {
         throw new Error(result?.message || "TopUp gagal");
       }
-
-      alert("✅ Berhasil TopUp untuk " + result.username);
-      showToast("Berhasil", "✅ TopUp user Berhasil!", "success");
+      
+      showToast("Berhasil", "✅ TopUp user " + result.username + ", user-profile " + result.profile + " di server " + result.server +  ". Berhasil!", "success");
+      setTimeout(() => location.reload(), 3000);
 
     } catch (e) {
       alert("❌ Error koneksi: " + e.message);

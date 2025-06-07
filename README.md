@@ -154,6 +154,10 @@ Kalau kamu mau bikin hanya 1 scheduler global untuk semua profile (bukan per pro
 |-----------------|------------|
 | ![](/frontend/assets/images/dashboard.png) | ![](/frontend/assets/images/users.png) |
 
+| Dashboard Setting | Terminal |
+|-----------------|------------|
+| ![](/frontend/assets/images/settings.png) | ![](/frontend/assets/images/terminal.png) |
+
 | Dash Mobile | User Mobile |
 |-----------------|------------|
 | ![](/frontend/assets/images/mobiledashboard.png) | ![](/frontend/assets/images/mobileusers.png) |

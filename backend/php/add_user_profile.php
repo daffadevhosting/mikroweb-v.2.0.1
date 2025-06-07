@@ -1,5 +1,6 @@
 <?php
 // file: add_user_profile.php
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Authorization, Content-Type");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -14,6 +15,7 @@ require_once __DIR__ . '/vendor/PEAR2/Autoload.php';
 
 use PEAR2\Net\RouterOS\Client;
 use PEAR2\Net\RouterOS\Request;
+use PEAR2\Net\RouterOS\Response;
 
 header('Content-Type: application/json');
 
@@ -97,14 +99,6 @@ $onEventScript = <<<RSC
 :local dateint do={:local montharray ( "jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec" );:local days [ :pick \$d 4 6 ];:local month [ :pick \$d 0 3 ];:local year [ :pick \$d 7 11 ];:local monthint ([ :find \$montharray \$month]);:local month (\$monthint + 1);:if ( [len \$month] = 1) do={:local zero ("0");:return [:tonum ("\$year\$zero\$month\$days")];} else={:return [:tonum ("\$year\$month\$days")];}}; :local timeint do={ :local hours [ :pick \$t 0 2 ]; :local minutes [ :pick \$t 3 5 ]; :return (\$hours * 60 + \$minutes) ; }; :local date [ /system clock get date ]; :local time [ /system clock get time ]; :local today [\$dateint d=\$date] ; :local curtime [\$timeint t=\$time] ; :foreach i in [ /ip hotspot user find where profile="{$name}" ] do={ :local comment [ /ip hotspot user get \$i comment]; :local name [ /ip hotspot user get \$i name]; :local gettime [:pic \$comment 12 20]; :if ([:pic \$comment 3] = "/" and [:pic \$comment 6] = "/") do={:local expd [\$dateint d=\$comment] ; :local expt [\$timeint t=\$gettime] ; :if ((\$expd < \$today and \$expt < \$curtime) or (\$expd < \$today and \$expt > \$curtime) or (\$expd = \$today and \$expt < \$curtime)) do={ [ /ip hotspot user set limit-uptime=1s \$i ]; [ /ip hotspot active remove [find where user=\$user] ];}}}
 RSC;
 
-    // Hapus scheduler sebelumnya
-    $oldSched = $client->sendSync(new Request('/system/scheduler/print'));
-    foreach ($oldSched as $sched) {
-        if ($sched->getType() === Response::TYPE_DATA && $sched->getProperty('name') === $scriptName) {
-            $client->sendSync((new Request('/system/scheduler/remove'))->setArgument('.id', $sched->getProperty('.id')));
-        }
-    }
-
 // ✅ Tambahkan ke MikroTik
 $addProfile = new Request('/ip/hotspot/user/profile/add');
 $addProfile->setArgument('name', $name);
@@ -113,6 +107,14 @@ if ($shared_users) $addProfile->setArgument('shared-users', $shared_users);
 if ($session_timeout) $addProfile->setArgument('session-timeout', $session_timeout);
 $addProfile->setArgument('on-login', $onLoginScript);
 $client->sendSync($addProfile);
+
+    // Hapus scheduler sebelumnya
+    $oldSched = $client->sendSync(new Request('/system/scheduler/print'));
+    foreach ($oldSched as $sched) {
+        if ($sched->getType() === Response::TYPE_DATA && $sched->getProperty('name') === $name) {
+            $client->sendSync((new Request('/system/scheduler/remove'))->setArgument('.id', $sched->getProperty('.id')));
+        }
+    }
 
 // ✅ Tambahkan scheduler auto killer
 $schedRequest = new Request('/system/scheduler/add');
@@ -138,4 +140,3 @@ echo json_encode([
     'success' => true,
     'message' => "✅ Profile '$name' berhasil ditambahkan ke MikroTik dan Firebase!"
 ]);
-exit;

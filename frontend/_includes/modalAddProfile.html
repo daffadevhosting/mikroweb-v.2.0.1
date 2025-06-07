@@ -23,7 +23,10 @@
           </div>
         </div>
         </div>
-      <div class="modal-footer">
+      <div class="modal-footer d-flex justify-content-between align-item-center">
+          <div>
+            <input type="number" class="form-control" id="price" name="price" placeholder="Harga sewa" min="1000">
+          </div>
         <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Simpan</button>
       </div>
       </form>
@@ -42,7 +45,8 @@ firebase.auth().onAuthStateChanged(async function(user) {
       name: document.getElementById("profileName").value,
       rate_limit: document.getElementById("rateLimit").value,
       shared_users: document.getElementById("sharedUsers").value,
-      session_timeout: document.getElementById("sessionTimeout").value
+      session_timeout: document.getElementById("sessionTimeout").value,
+      price: document.getElementById("price").value
     };
 
     const response = await fetch('{{site.php_url}}/php/add_user_profile.php', {
@@ -55,13 +59,12 @@ firebase.auth().onAuthStateChanged(async function(user) {
       body: JSON.stringify(payload)
     });
 
-
 const result = await response.json();
 
     if (result.success) {
       showToast('Berhasil', result.message, 'success');
       document.getElementById('formAddProfile').reset();
-      modal.dismiss();
+      document.getElementById('modalTambahProfile').dismiss();
       setTimeout(() => location.reload(), 3000);
     } else {
       showToast('Gagal', result.message || 'Gagal tambah profile', 'error');

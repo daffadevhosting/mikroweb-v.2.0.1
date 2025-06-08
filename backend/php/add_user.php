@@ -1,7 +1,9 @@
 <?php
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Authorization, Content-Type");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -34,14 +36,8 @@ if (!$uid) {
     exit;
 }
 
-// ✅ Ambil data router dari frontend (bukan Firebase)
-$router = $input['router'] ?? [];
-$host = $router['ip'] ?? '';
-$user = $router['username'] ?? '';
-$pass = $router['password'] ?? '';
-
 $username = $input['username'] ?? '';
-$password = $input['password'] ?? '123456';
+$password = $input['password'] ?? 'pass123';
 $profile = $input['profile'] ?? 'default';
 $rate_limit = $input['rate_limit'] ?? '1M/1M';
 $session_input = $input['session_timeout'] ?? '1';
@@ -52,7 +48,7 @@ $session_timeout = str_pad($session_input, 2, '0', STR_PAD_LEFT) . ':00:00';
 if (!$host || !$user || !$pass || !$username) {
     echo json_encode([
         'success' => false,
-        'message' => 'Data router/user tidak lengkap.'
+        'message' => 'Data user tidak lengkap.'
     ]);
     exit;
 }
@@ -100,7 +96,7 @@ try {
     $addUser->setArgument('name', $username);
     $addUser->setArgument('password', $password);
     $addUser->setArgument('profile', $profile);
-    $addUser->setArgument('comment', "UID: $uid | via Dashboard");
+    $addUser->setArgument('limit-uptime', "00:00:01");
 
     $responses = $client->sendSync($addUser);
     foreach ($responses as $resp) {

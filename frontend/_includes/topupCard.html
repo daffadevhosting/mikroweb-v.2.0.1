@@ -1,64 +1,135 @@
-<div class="card p-4" style="width: 100%; min-width: 380px;">
-  <h5 class="mb-3">Topup User Hotspot</h5>
+  <style>
+    .form-select {
+      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
 
-  <div class="mb-3">
-    <label>User Hotspot</label>
-    <select id="userDropdown" class="form-select"></select>
+    .form-select:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+    }
+
+    label {
+      font-weight: 500;
+    }
+
+    .card {
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    }
+
+    .btn-primary {
+      border-radius: 2rem;
+      padding: 0.6rem 2rem;
+      font-weight: 600;
+    }    .dropdown-menu-custom {
+      border-radius: 1rem;
+      border: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      padding: 0.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-item-custom {
+      border-radius: 0.5rem;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s ease;
+    }
+
+    .dropdown-item-custom:hover {
+      background: #f0f2f5;
+    }
+  </style>
+</head>
+  <div class="card p-4 mx-auto" style="width: 100%; min-width: 380px;">
+    <h5 class="mb-4 fw-bold">💸 Topup User Hotspot</h5>
+
+    <div class="mb-3">
+      <label for="userDropdown">User Hotspot</label>
+      <select id="userDropdown" class="form-select">
+        <option selected disabled>Loading users...</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="profileDropdown">User Profile</label>
+      <select id="profileDropdown" class="form-select">
+        <option selected disabled>Loading profiles...</option>
+      </select>
+    </div>
+
+    <div class="mb-4">
+      <label for="serverDropdown">Hotspot Server</label>
+      <select id="serverDropdown" class="form-select">
+        <option selected disabled>Loading servers...</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary w-100" id="topupBtn">
+      🚀 Topup Sekarang
+    </button>
   </div>
-
-  <div class="mb-3">
-    <label>User Profile</label>
-    <select id="profileDropdown" class="form-select"></select>
-  </div>
-
-  <div class="mb-3">
-    <label>Hotspot Server</label>
-    <select id="serverDropdown" class="form-select"></select>
-  </div>
-
-  <button class="btn btn-primary" id="topupBtn">Topup Sekarang</button>
-</div>
 <script>
 async function loadDropdownData() {
   firebase.auth().onAuthStateChanged(async function(user) {
     if (!user) return;
     const token = await user.getIdToken();
 
-    const res = await fetch("{{site.php_url}}/php/get_data_topup.php", {
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json"
-      }
-    });
+    try {
+      const res = await fetch("{{site.php_url}}/php/get_data_topup.php", {
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json"
+        }
+      });
 
-    const text = await res.text();
-    console.log("🔥 Server response:", text);
+      const text = await res.text();
+      console.log("🔥 Server response:", text);
 
-    const json = JSON.parse(text);
-    if (!json.success) return;
+      const json = JSON.parse(text);
+      if (!json.success) return;
 
-    const { users, profiles, servers } = json.data;
-    const ignoreList = ['default', 'admin', 'default-trial'];
+      const { users, profiles, servers } = json.data;
+      const ignoreList = ['default', 'admin', 'default-trial'];
 
+      // Clear all dropdowns first
+      userDropdown.innerHTML = '<option selected disabled>Pilih User</option>';
+      profileDropdown.innerHTML = '<option selected disabled>Pilih Profile</option>';
+      serverDropdown.innerHTML = '<option selected disabled>Pilih Server</option>';
 
-    // USERS (dari Mikrotik)
-    users?.forEach(u => {
-      if (!ignoreList.includes(u.name.toLowerCase())) {
-        userDropdown.innerHTML += `<option value="${u.name}">${u.name}</option>`;
-      }
-    });
+      // USERS
+      users?.forEach(u => {
+        if (!ignoreList.includes(u.name.toLowerCase())) {
+          userDropdown.innerHTML += `<option value="${u.name}">${u.name}</option>`;
+        }
+      });
 
-    // SERVERS (dari Mikrotik)
-    servers?.forEach(s => {
-      serverDropdown.innerHTML += `<option value="${s.name}">${s.name}</option>`;
-    });
+      // PROFILES
+      profiles?.forEach(p => {
+        if (!ignoreList.includes(p.name.toLowerCase())) {
+          profileDropdown.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+        }
+      });
 
-    // PROFILES (dari Mikrotik)
-    profiles?.forEach(p => {
-      if (!ignoreList.includes(p.name.toLowerCase())) {
-        profileDropdown.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-      }
-    });
+      // SERVERS
+      servers?.forEach(s => {
+        serverDropdown.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+      });
+
+    } catch (error) {
+      console.error("❌ Error loading dropdown:", error);
+    }
   });
 }
 

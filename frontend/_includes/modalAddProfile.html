@@ -59,7 +59,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
       body: JSON.stringify(payload)
     });
 
-const result = await response.json();
+      const result = await response.json();
 
     if (result.success) {
       showToast('Berhasil', result.message, 'success');

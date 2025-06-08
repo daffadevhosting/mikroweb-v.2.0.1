@@ -27,7 +27,7 @@ html, body {
   backdrop-filter: blur(10px) saturate(49%) !important;
   -webkit-backdrop-filter: blur(10px) saturate(49%) !important;
   background-color: rgba(39, 44, 52, 0.65) !important;
-  border-radius: 16px !important;
+  border-radius: var(--bs-card-border-radius);
   border: 1px solid rgba(255, 255, 255, 0.125) !important;
   overflow: hidden !important;
 }

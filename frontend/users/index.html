@@ -58,78 +58,90 @@ permalink: /users
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-bg-dark">
-      <form id="addUserForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalAddUserLabel">Tambah User Hotspot</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+
+  <div class="card shadow-sm">
+    <div class="card-header text-white">
+      <h5 class="mb-0">Form Tambah User Hotspot</h5>
+    </div>
+      <form id="hotspotForm">
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" required>
         </div>
-        <div class="modal-body ">
-          <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" id="useRName" class="form-control" name="username" required>
-          </div>
-          <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="text" id="pasSWord" class="form-control" name="password" required>
-          </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="text" class="form-control" id="password" value="123456">
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Tambah User</button>
+
+        <div class="mb-3">
+          <label for="profile" class="form-label">Profile</label>
+          <input type="text" class="form-control" id="profile" value="default">
         </div>
+
+        <div class="mb-3">
+          <label for="rate_limit" class="form-label">Rate Limit</label>
+          <input type="text" class="form-control" id="rate_limit" value="1M/1M">
+        </div>
+
+        <div class="mb-3">
+          <label for="shared_users" class="form-label">Shared Users</label>
+          <input type="number" class="form-control" id="shared_users" value="1" min="1">
+        </div>
+<div class="d-flex justify-content-between align-items-center mt-3">
+        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Kirim</button>
+        <div id="result" class=""></div>
+</div>
       </form>
+
 <script>
-document.getElementById('addUserForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
+  document.getElementById("hotspotForm").addEventListener("submit", function(e) {
+    e.preventDefault();
 
-  const user = firebase.auth().currentUser;
-  if (!user) {
-    showToast("Gagal Login", "Anda belum login", "error");
-    return;
-  }
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const profile = document.getElementById("profile").value;
+    const rate_limit = document.getElementById("rate_limit").value;
+    const shared_users = document.getElementById("shared_users").value;
+    const resultDiv = document.getElementById("result");
 
-  try {
-    const uid = user.uid;
-    const token = await user.getIdToken();
+    resultDiv.innerHTML = "⏳ Mengirim...";
 
-    // 🔥 Ambil data router default dari Firebase
-    const snap = await firebase.database().ref('mikrotik_logins/' + uid).once('value');
-    const routers = snap.val();
-    if (!routers) {
-      showToast("Gagal", "Router tidak ditemukan di akun ini", "error");
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        showToast('Perhatian!', 'Kamu belum login.', 'waning');
       return;
     }
 
-    const defaultRouter = Object.values(routers).find(r => r.isDefault);
-    if (!defaultRouter) {
-      showToast("Gagal", "Router default belum diatur", "error");
-      return;
-    }
+    user.getIdToken().then(function(idToken) {
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("password", password);
+      formData.append("profile", profile);
+      formData.append("rate_limit", rate_limit);
+      formData.append("shared_users", shared_users);
 
-    // 🔁 Siapkan data user dan router
-    const payload = {
-      username: document.getElementById("useRName").value,
-      password: document.getElementById("pasSWord").value
-    };
-
-    const response = await fetch('{{site.php_url}}/php/save_to_firebase.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(payload)
+      fetch("{{site.php_url}}/php/input_user.php", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + idToken
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast('Berhasil!', data.message, 'success');
+          setTimeout(() => {
+          //location.reload();
+          }, 3000);
+        } else {
+          showToast('Gagal!', data.error || 'Terjadi kesalahan.', 'danger');
+        }
+      })
     });
-
-    const result = await response.json();
-    showToast(result.success ? "Sukses" : "Gagal", result.message, result.success ? "success" : "error");
-
-    if (result.success) {
-      document.getElementById('addUserForm').reset();
-    }
-
-  } catch (err) {
-    console.error("Tambah user error:", err);
-    showToast("Gagal", "Terjadi kesalahan saat tambah user", "error");
-  }
-});
+  });
 </script>
     </div>
   </div>

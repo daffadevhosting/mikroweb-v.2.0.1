@@ -1,0 +1,460 @@
+PEAR2\Net\RouterOS\ResponseCollection Object
+(
+    [responses:protected] => Array
+        (
+            [0] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *0
+                            [name] => default-trial
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [default] => true
+                            [dynamic] => false
+                            [disabled] => false
+                            [comment] => counters and limits for trial users
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [1] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *1
+                            [name] => admin
+                            [profile] => default
+                            [uptime] => 23s
+                            [bytes-in] => 189944
+                            [bytes-out] => 361070
+                            [packets-in] => 680
+                            [packets-out] => 730
+                            [dynamic] => false
+                            [disabled] => false
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [2] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *3
+                            [server] => hotspot1
+                            [name] => vilda
+                            [password] => pass123
+                            [profile] => rumah
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => true
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [3] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *4
+                            [server] => hs-wlan1
+                            [name] => testuser
+                            [password] => 123456
+                            [mac-address] => EA:63:30:56:3A:4C
+                            [profile] => mikroweb
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => false
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [4] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *8
+                            [server] => hotspot1
+                            [name] => acong
+                            [password] => pass123
+                            [profile] => rumah
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => true
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [5] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *A
+                            [server] => hotspot1
+                            [name] => kunyuk
+                            [password] => 1234
+                            [mac-address] => EA:63:30:56:3A:4C
+                            [profile] => rumah
+                            [limit-uptime] => 1s
+                            [uptime] => 1h27m42s
+                            [bytes-in] => 1308687
+                            [bytes-out] => 5613311
+                            [packets-in] => 7365
+                            [packets-out] => 8303
+                            [dynamic] => false
+                            [disabled] => false
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [6] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *C
+                            [server] => hs-wlan1
+                            [name] => ayah
+                            [password] => qaz123
+                            [mac-address] => EA:63:30:56:3A:4C
+                            [profile] => mikroweb
+                            [limit-uptime] => 1s
+                            [uptime] => 7m24s
+                            [bytes-in] => 661728
+                            [bytes-out] => 470273
+                            [packets-in] => 1415
+                            [packets-out] => 1269
+                            [dynamic] => false
+                            [disabled] => true
+                            [comment] => jun/08/2025 00:42:00
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [7] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *E
+                            [server] => hs-wlan1
+                            [name] => bunda
+                            [password] => 123456
+                            [profile] => rumah
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => false
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [8] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *26
+                            [server] => hs-wlan1
+                            [name] => daffa
+                            [password] => 123456
+                            [profile] => rumah
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => true
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [9] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *2B
+                            [name] => mikroapi
+                            [password] => 123456
+                            [profile] => default
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => false
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [10] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *2C
+                            [name] => ibu
+                            [password] => 123456
+                            [profile] => default
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => true
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [11] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *31
+                            [name] => tnch90
+                            [password] => 123456
+                            [profile] => default
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => true
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [12] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *38
+                            [name] => ndang
+                            [password] => 123456
+                            [profile] => default
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => true
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [13] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *3A
+                            [server] => hotspot1
+                            [name] => nopi
+                            [password] => 123456
+                            [profile] => rumah
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => false
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [14] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                            [.id] => *41
+                            [name] => daffa
+                            [password] => 123456
+                            [profile] => default
+                            [uptime] => 0s
+                            [bytes-in] => 0
+                            [bytes-out] => 0
+                            [packets-in] => 0
+                            [packets-out] => 0
+                            [dynamic] => false
+                            [disabled] => true
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !re
+                )
+
+            [15] => PEAR2\Net\RouterOS\Response Object
+                (
+                    [attributes:protected] => Array
+                        (
+                        )
+
+                    [_tag:PEAR2\Net\RouterOS\Message:private] => 
+                    [unrecognizedWords:protected] => Array
+                        (
+                        )
+
+                    [_type:PEAR2\Net\RouterOS\Response:private] => !done
+                )
+
+        )
+
+    [responseTypes:protected] => Array
+        (
+            [0] => !re
+            [1] => !re
+            [2] => !re
+            [3] => !re
+            [4] => !re
+            [5] => !re
+            [6] => !re
+            [7] => !re
+            [8] => !re
+            [9] => !re
+            [10] => !re
+            [11] => !re
+            [12] => !re
+            [13] => !re
+            [14] => !re
+            [15] => !done
+        )
+
+    [responseTags:protected] => Array
+        (
+            [0] => 
+            [1] => 
+            [2] => 
+            [3] => 
+            [4] => 
+            [5] => 
+            [6] => 
+            [7] => 
+            [8] => 
+            [9] => 
+            [10] => 
+            [11] => 
+            [12] => 
+            [13] => 
+            [14] => 
+            [15] => 
+        )
+
+    [responsesIndex:protected] => Array
+        (
+        )
+
+    [propertyMap:protected] => 
+    [position:protected] => 0
+    [index:protected] => 
+    [compareBy:protected] => Array
+        (
+        )
+
+)

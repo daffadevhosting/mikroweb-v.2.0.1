@@ -10,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_once __DIR__ . '/vendor/PEAR2/Autoload.php';
 require_once __DIR__ . '/firebase_init.php';
+require_once __DIR__ . '/vendor/PEAR2/Autoload.php';
 
 use PEAR2\Net\RouterOS;
 

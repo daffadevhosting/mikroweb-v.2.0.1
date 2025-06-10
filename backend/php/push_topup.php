@@ -55,7 +55,7 @@ try {
     $usernameHotspot = trim($input['username'] ?? '');
     $server = $input['server'] ?? '';
     $user_profile = $input['user_profile'] ?? '';
-    $harga = (int) str_replace('.', '', $input['harga'] ?? 0);
+    $price = (int) str_replace('.', '', $input['price'] ?? 5000);
 
     if (!$usernameHotspot || !$server || !$user_profile) {
         throw new Exception("Semua field wajib diisi");

@@ -103,21 +103,25 @@ body {
 }
 
 .login-form .btn {
-    border-radius: var(--bs-border-radius)!important;
+    border-radius: var(--bs-border-radius-pill)!important;
     -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
 }
 
 .login-form .btn.btn-primary {
-    background: #3BC3FF;
+    background: var(--blue-blur);
     border-color: #31c0ff;
 }
 
+.login-form .btn.btn-primary:hover {
+    background: var(--bs-btn-hover-bg);
+}
+
 .slider-feature-card {
-    background: rgba(255, 255, 255, 0.2);
+    background: #6c757d52;
     border-radius: 16px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 35px -3px #151b26;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -125,8 +129,7 @@ body {
     margin: 0 auto;
     padding: 30px;
     text-align: center;
-    -webkit-box-shadow: 0 2px 25px -3px rgba(0, 0, 0, 0.1);
-    box-shadow: 0 2px 25px -3px rgba(0, 0, 0, 0.1);
+    -webkit-box-shadow: 0 2px 35px -3px #151b26;
 }
 
 .slider-feature-card img {
@@ -138,6 +141,10 @@ body {
 .slider-feature-card h3,
 .slider-feature-card p {
     margin-bottom: 30px;
+}
+
+.carousel-inner {
+    overflow: visible !important;
 }
 
 .carousel-indicators {

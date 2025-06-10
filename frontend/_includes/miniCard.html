@@ -116,7 +116,8 @@ async function fetchPendapatan() {
   let pendapatanHarian = 0;
   let pendapatanBulanan = 0;
 
-  const snapshot = await db.ref('topup_logs').once('value');
+  const uid = firebase.auth().currentUser.uid;
+  const snapshot = await db.ref(`topup_logs/${uid}`).once('value');
   if (!snapshot.exists()) return { pendapatanHarian, pendapatanBulanan };
 
   snapshot.forEach(userSnap => {
@@ -137,20 +138,11 @@ async function fetchPendapatan() {
 
   return { pendapatanHarian, pendapatanBulanan };
 }
-firebase.auth().onAuthStateChanged(async user => {
-  if (!user) return;
 
-  const token = await user.getIdToken();
-  const userRoleSnap = await db.ref(`users/${user.uid}/role`).once('value');
-  const role = userRoleSnap.val();
-
-  if (role === 'admin') {
-fetchPendapatan().then(({pendapatanHarian, pendapatanBulanan}) => {
-  document.getElementById('daily-income').textContent = pendapatanHarian.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
-  document.getElementById('monthly-income').textContent = pendapatanBulanan.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
-});
+  fetchPendapatan().then(({pendapatanHarian, pendapatanBulanan}) => {
+    document.getElementById('daily-income').textContent = pendapatanHarian.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
+    document.getElementById('monthly-income').textContent = pendapatanBulanan.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
+    });
   }
-  });
-}
 });
 </script>

@@ -50,7 +50,7 @@ permalink: /users
 
   </div>
 <nav>
-  <ul class="pagination justify-content-center" id="pagination"></ul>
+  <ul class="pagination justify-content-end mx-3" id="pagination"></ul>
 </nav>
 </div>
 
@@ -63,7 +63,7 @@ permalink: /users
     <div class="card-header text-white">
       <h5 class="mb-0">Form Tambah User Hotspot</h5>
     </div>
-      <form id="hotspotForm">
+      <form class="card-body" id="hotspotForm">
         <div class="mb-3">
           <label for="username" class="form-label">Username</label>
           <input type="text" class="form-control" id="username" required>
@@ -76,7 +76,7 @@ permalink: /users
 
         <div class="mb-3">
           <label for="profile" class="form-label">Profile</label>
-          <input type="text" class="form-control" id="profile" value="default">
+          <input type="text" class="form-control" id="profile" value="default" disabled>
         </div>
 
         <div class="mb-3">
@@ -88,7 +88,7 @@ permalink: /users
           <label for="shared_users" class="form-label">Shared Users</label>
           <input type="number" class="form-control" id="shared_users" value="1" min="1">
         </div>
-<div class="d-flex justify-content-between align-items-center mt-3">
+<div class="d-flex justify-content-end align-items-center mt-3">
         <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Kirim</button>
         <div id="result" class=""></div>
 </div>

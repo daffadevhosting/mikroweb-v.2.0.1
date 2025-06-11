@@ -11,11 +11,10 @@
                         <th>Tanggal</th>
                         <th>Username</th>
                         <th>Profile</th>
-                        <th>Jenis</th>
+                        <th>Start Time</th>
                         <th>Limit</th>
-                        <th>Masa Aktif</th>
+                        <th>End Time</th>
                         <th>Harga</th>
-                        <th>Server</th>
                         </tr>
                     </thead>
                     <tbody id="log-table-body">
@@ -58,11 +57,10 @@ fetchTopupLogs().then(logs => {
         <td>${log.tanggal}</td>
         <td>${log.username}</td>
         <td>${log.user_profile}</td>
-        <td>${log.jenis_paket}</td>
-        <td>${log.limit}</td>
-        <td>${log.masa_aktif} hari</td>
+        <td>${log.start_time}</td>
+        <td>${log.session_timeout}</td>
+        <td>${log.expired_time}</td>
         <td>${Number(log.price).toLocaleString('id-ID', {style: 'currency', currency: 'IDR'})}</td>
-        <td>${log.server}</td>
       </tr>
     `;
     tableBody.insertAdjacentHTML('beforeend', row);

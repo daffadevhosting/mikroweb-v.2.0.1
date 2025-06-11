@@ -18,10 +18,55 @@ use PEAR2\Net\RouterOS\Client;
 use PEAR2\Net\RouterOS\Request;
 use PEAR2\Net\RouterOS\Response;
 
+date_default_timezone_set("Asia/Jakarta");
+
 header('Content-Type: application/json');
 
+function convertTimeLimit($limit) {
+    // Contoh: '1h', '30m', '2d'
+    $matches = [];
+    if (preg_match('/^(\d+)([hdm])$/i', $limit, $matches)) {
+        $value = (int) $matches[1];
+        $unit = strtolower($matches[2]);
+        switch ($unit) {
+            case 'h': return "{$value}h";
+            case 'd': return "{$value}d";
+            case 'm': return "{$value}m";
+            default: return '1h'; // fallback
+        }
+    }
+    return '1h';
+}
+
+function convertQuotaToBytes($quota) {
+    // Contoh: '100M', '1G', '500K'
+    $matches = [];
+    if (preg_match('/^(\d+)([KMG])B?$/i', strtoupper($quota), $matches)) {
+        $value = (int) $matches[1];
+        $unit = strtoupper($matches[2]);
+        switch ($unit) {
+            case 'K': return $value * 1024;
+            case 'M': return $value * 1024 * 1024;
+            case 'G': return $value * 1024 * 1024 * 1024;
+        }
+    }
+    return 100 * 1024 * 1024; // fallback: 100MB
+}
+
+function parseSessionTimeout($timeout) {
+    if (preg_match('/^(\d+)([hdm])$/i', $timeout, $matches)) {
+        $value = (int)$matches[1];
+        $unit = strtolower($matches[2]);
+        switch ($unit) {
+            case 'h': return $value * 3600;
+            case 'd': return $value * 86400;
+            case 'm': return $value * 60;
+        }
+    }
+    return 3600; // Default 1 jam
+}
+
 try {
-    // === [1] Token & User Verification ===
     $headers = getallheaders();
     $authHeader = $headers['Authorization'] ?? '';
     if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
@@ -35,7 +80,6 @@ try {
     }
     $uid = $user['uid'];
 
-    // === [2] Ambil Router Default ===
     $routers = $database->getReference("mikrotik_logins/{$uid}")->getValue();
     if (!$routers) throw new Exception("Data router kosong");
 
@@ -50,92 +94,99 @@ try {
 
     $client = new Client($defaultRouter['ip'], $defaultRouter['username'], $defaultRouter['password']);
 
-    // === [3] Ambil Input dari Frontend ===
     $input = json_decode(file_get_contents("php://input"), true);
     $usernameHotspot = trim($input['username'] ?? '');
     $server = $input['server'] ?? '';
     $user_profile = $input['user_profile'] ?? '';
-    $allProfiles = $database->getReference("user_profiles/{$uid}")->getValue();
-    $price = 0;
-    if ($allProfiles) {
-        foreach ($allProfiles as $key => $item) {
-            if (strtolower(trim($key)) === strtolower(trim($user_profile))) {
-                $price = isset($item['price']) ? (int)$item['price'] : 0;
-                break;
-            }
-        }
-    }
 
     if (!$usernameHotspot || !$server || !$user_profile) {
         throw new Exception("Semua field wajib diisi");
     }
 
+    $allProfiles = $database->getReference("user_profiles/{$uid}")->getValue();
+    $profileData = $allProfiles[$user_profile] ?? null;
+    if (!$profileData) throw new Exception("User-profile tidak ditemukan");
+
+    $price = (int)($profileData['price'] ?? 0);
+    $sessionTimeout = ($profileData['session_timeout'] ?? '1h');
+    $sessionTimeoutStr = $paket['session_timeout'] ?? '1h'; // Ambil dari Firebase
+    $timeoutSeconds = parseSessionTimeout($sessionTimeoutStr);
+    $startTimestamp = time(); // sekarang (UNIX time)
+    $expireTimestamp = $startTimestamp + $timeoutSeconds;
+
+    $startTimeFormatted = date("Y-m-d H:i:s", $startTimestamp);
+    $expireTimeFormatted = date("Y-m-d H:i:s", $expireTimestamp);
+
     $masaAktif = $paket['masa_aktif'] ?? 1;
     $jenis = strtolower($paket['jenis_paket'] ?? 'time');
-    $limit = $jenis === 'time' ? ($paket['time_limit'] ?? '1h') : ($paket['quota_limit'] ?? '100M');
+    $limit = $jenis === 'time' ? ($paket['session_timeout'] ?? '1h') : ($paket['quota_limit'] ?? '100M');
 
-    // === [5] Cek User di Mikrotik ===
+    if ($jenis === 'time') {
+        $limitUptime = convertTimeLimit($limit); // contoh: "1h"
+        $mikrotikCmds = [
+            "/ip hotspot user set [find where name=\"$username\"] limit-uptime=$limitUptime",
+            "/ip hotspot user reset-counters [find where name=\"$username\"]"
+        ];
+    } else {
+        $limitBytes = convertQuotaToBytes($limit); // contoh: 104857600
+        $mikrotikCmds = [
+            "/ip hotspot user set [find where name=\"$username\"] limit-uptime=0s",
+            "/ip hotspot user set [find where name=\"$username\"] limit-bytes-total=$limitBytes",
+            "/ip hotspot user reset-counters [find where name=\"$username\"]"
+        ];
+    }
+
     $response = $client->sendSync(new Request('/ip/hotspot/user/print'));
     $userFound = false;
     $userId = null;
 
-    $targetUsername = strtolower(trim($usernameHotspot));
     foreach ($response as $item) {
         if ($item->getType() === Response::TYPE_DATA) {
-            $mikrotikUser = strtolower(trim($item->getProperty('name')));
-            if ($mikrotikUser === $targetUsername) {
+            if (strtolower(trim($item->getProperty('name'))) === strtolower($usernameHotspot)) {
                 $userFound = true;
                 $userId = $item->getProperty('.id');
                 break;
             }
         }
     }
+    if (!$userFound) throw new Exception("User '{$usernameHotspot}' tidak ditemukan di Mikrotik");
 
-    if (!$userFound) {
-        throw new Exception("User '{$usernameHotspot}' tidak ditemukan di Mikrotik");
-    }
-
-    // === [6] Update Profile User ===
     $client->sendSync((new Request('/ip/hotspot/user/set'))
         ->setArgument('server', $server)
         ->setArgument('.id', $userId)
         ->setArgument('profile', $user_profile)
-        ->setArgument('comment', '') // Kosongkan komentar
+        ->setArgument('comment', '')
         ->setArgument('disabled', 'no')
     );
 
-    // === [7] Tambah Scheduler untuk Expired ===
-    $expireDate = date("M/d/Y", strtotime("+{$masaAktif} days"));
     $scriptName = "exp-{$usernameHotspot}";
     $scriptBody = <<<SCR
     [/ip hotspot active remove [find where user={$usernameHotspot}]];
     [/ip hotspot user disable [find where name={$usernameHotspot}]];
     [/ip hotspot cookie remove [find user={$usernameHotspot}]];
     [/system scheduler remove [find where name={$scriptName}]];
-    [/sys sch re [find where name={$usernameHotspot}]]
     SCR;
 
     $client->sendSync((new RouterOS\Request('/system/scheduler/add'))
         ->setArgument('name', $scriptName)
-        ->setArgument('start-date', $expireDate)
-        ->setArgument('interval', '1d')
+        ->setArgument('start-date', $expiredDateFormatted)
+        ->setArgument('interval', $sessionTimeout)
         ->setArgument('on-event', $scriptBody));
 
-    // === [8] Simpan Log ke Firebase ===
     $logId = uniqid();
     $logData = [
         "username" => $usernameHotspot,
         "server" => $server,
         "user_profile" => $user_profile,
         "price" => $price,
-        "masa_aktif" => $masaAktif,
-        "jenis_paket" => $jenis,
-        "limit" => $limit,
-        "tanggal" => date("Y-m-d H:i:s"),
+        "session_timeout" => $sessionTimeoutStr,
+        "start_time" => $startTimeFormatted,
+        "expired_time" => $expireTimeFormatted,
+        "status" => "active",
+        "tanggal" => $startTimeFormatted,
     ];
     $database->getReference("topup_logs/{$uid}/{$logId}")->set($logData);
 
-    // === [9] Kirim Respon Final ke Frontend ===
     echo json_encode([
         "success" => true,
         "message" => "TopUp berhasil",

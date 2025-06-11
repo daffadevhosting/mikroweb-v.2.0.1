@@ -22,16 +22,11 @@
             <input type="text" class="form-control" id="sessionTimeout" name="session_timeout" placeholder="Session Timeout (hh:mm:ss)">
           </div>
         </div>
-        <div class="row g-2 mb-2">
-          <div class="col-md-6">
-            <input type="text" class="form-control" id="limitUptime" name="limit_uptime" placeholder="Limit Uptime (hh:mm:ss)" min="00:30:00">
-          </div>
-          <div class="col-md-6">
-            <input type="number" class="form-control" id="price" name="price" placeholder="Harga sewa" min="1000">
-          </div>
-        </div>
         </div>
       <div class="modal-footer d-flex justify-content-between align-item-center">
+          <div>
+            <input type="number" class="form-control" id="price" name="price" placeholder="Harga sewa" min="1000">
+          </div>
         <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Simpan</button>
       </div>
       </form>
@@ -50,7 +45,6 @@ firebase.auth().onAuthStateChanged(async function(user) {
       name: document.getElementById("profileName").value,
       rate_limit: document.getElementById("rateLimit").value,
       shared_users: document.getElementById("sharedUsers").value,
-      limit_uptime: document.getElementById("limitUptime").value,
       session_timeout: document.getElementById("sessionTimeout").value,
       price: document.getElementById("price").value
     };
@@ -70,8 +64,9 @@ firebase.auth().onAuthStateChanged(async function(user) {
     if (result.success) {
       showToast('Berhasil', result.message, 'success');
       document.getElementById('formAddProfile').reset();
-      document.getElementById('modalTambahProfile').dismiss();
-      setTimeout(() => {loadProfiles();}, 2000);
+      setTimeout(() => {
+        renderProfiles();
+      }, 2000);
     } else {
       showToast('Gagal', result.message || 'Gagal tambah profile', 'error');
     }

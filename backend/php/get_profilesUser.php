@@ -66,23 +66,23 @@ foreach ($firebaseProfilesRaw as $key => $data) {
         if ($res->getType() === RouterOS\Response::TYPE_DATA) {
 
         // Normalisasi nama agar cocok
-        $normalizedName = strtolower(trim($name));
+        $normalizedName = strtolower(trim($res->getProperty('name')));
         $price = isset($firebaseProfiles[$normalizedName]['price']) ? (int)$firebaseProfiles[$normalizedName]['price'] : null;
 
-            $profile = [
-                'keyId' => $res->getProperty('.id') ?? '',
-                'name' => $res->getProperty('name') ?? '',
-                'rate_limit' => $res->getProperty('rate-limit') ?? '',
-                'session_timeout' => $res->getProperty('session-timeout') ?? '',
-                'shared_users' => $res->getProperty('shared-users') ?? '',
-                'on-login' => $res->getProperty('on-login') ?? '',
-                'on-logout' => $res->getProperty('on-logout') ?? '',
-                'address-pool' => $res->getProperty('address-pool') ?? '',
-                'idle-timeout' => $res->getProperty('idle-timeout') ?? '',
-                'keepalive-timeout' => $res->getProperty('keepalive-timeout') ?? '',
-                'status-autorefresh' => $res->getProperty('status-autorefresh') ?? '',
-                'price' =>  $res->getProperty('price') ?? '',
-            ];
+        $profile = [
+            'keyId' => $res->getProperty('.id') ?? '',
+            'name' => $res->getProperty('name') ?? '',
+            'rate_limit' => $res->getProperty('rate-limit') ?? '',
+            'session_timeout' => $res->getProperty('session-timeout') ?? '',
+            'shared_users' => $res->getProperty('shared-users') ?? '',
+            'on-login' => $res->getProperty('on-login') ?? '',
+            'on-logout' => $res->getProperty('on-logout') ?? '',
+            'address-pool' => $res->getProperty('address-pool') ?? '',
+            'idle-timeout' => $res->getProperty('idle-timeout') ?? '',
+            'keepalive-timeout' => $res->getProperty('keepalive-timeout') ?? '',
+            'status-autorefresh' => $res->getProperty('status-autorefresh') ?? '',
+            'price' => $price, // ✅ Ambil dari Firebase, bukan dari Mikrotik
+        ];
             $profiles[] = $profile;
         }
     }

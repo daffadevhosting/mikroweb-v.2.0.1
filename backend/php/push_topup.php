@@ -55,7 +55,16 @@ try {
     $usernameHotspot = trim($input['username'] ?? '');
     $server = $input['server'] ?? '';
     $user_profile = $input['user_profile'] ?? '';
-    $price = (int) str_replace('.', '', $input['price'] ?? 5000);
+    $allProfiles = $database->getReference("user_profiles/{$uid}")->getValue();
+    $price = 0;
+    if ($allProfiles) {
+        foreach ($allProfiles as $key => $item) {
+            if (strtolower(trim($key)) === strtolower(trim($user_profile))) {
+                $price = isset($item['price']) ? (int)$item['price'] : 0;
+                break;
+            }
+        }
+    }
 
     if (!$usernameHotspot || !$server || !$user_profile) {
         throw new Exception("Semua field wajib diisi");
@@ -99,12 +108,12 @@ try {
     $expireDate = date("M/d/Y", strtotime("+{$masaAktif} days"));
     $scriptName = "exp-{$usernameHotspot}";
     $scriptBody = <<<SCR
-[/ip hotspot active remove [find where user={$usernameHotspot}]];
-[/ip hotspot user disable [find where name={$usernameHotspot}]];
-[/ip hotspot cookie remove [find user={$usernameHotspot}]];
-[/system scheduler remove [find where name={$scriptName}]];
-[/sys sch re [find where name={$usernameHotspot}]]
-SCR;
+    [/ip hotspot active remove [find where user={$usernameHotspot}]];
+    [/ip hotspot user disable [find where name={$usernameHotspot}]];
+    [/ip hotspot cookie remove [find user={$usernameHotspot}]];
+    [/system scheduler remove [find where name={$scriptName}]];
+    [/sys sch re [find where name={$usernameHotspot}]]
+    SCR;
 
     $client->sendSync((new RouterOS\Request('/system/scheduler/add'))
         ->setArgument('name', $scriptName)
@@ -118,7 +127,7 @@ SCR;
         "username" => $usernameHotspot,
         "server" => $server,
         "user_profile" => $user_profile,
-        "price" => (float)$price,
+        "price" => $price,
         "masa_aktif" => $masaAktif,
         "jenis_paket" => $jenis,
         "limit" => $limit,
@@ -133,6 +142,7 @@ SCR;
         "username" => $usernameHotspot,
         "profile" => $user_profile,
         "server" => $server,
+        "harga" => $price,
     ]);
     exit;
 

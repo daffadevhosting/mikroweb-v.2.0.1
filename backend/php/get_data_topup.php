@@ -69,26 +69,45 @@ try {
             $servers[] = ['name' => $item->getProperty('name')];
         }
     }
+    
+// Ambil semua profile dari Firebase dan normalisasi key-nya (lowercase tanpa spasi)
+$firebaseProfilesRaw = $database->getReference("user_profiles/{$uid}")->getValue();
+$firebaseProfiles = [];
+
+foreach ($firebaseProfilesRaw as $key => $data) {
+    $normalizedKey = strtolower(trim($key));
+    $firebaseProfiles[$normalizedKey] = $data;
+}
 
     // === [5] Ambil Paket Profile ===
-    $profiles = [];
-    $resProfiles = $client->sendSync(new Request('/ip/hotspot/user/profile/print'));
-    foreach ($resProfiles as $item) {
-        if ($item->getType() === Response::TYPE_DATA) {
-            $profiles[] = [
-                'name' => $item->getProperty('name'),
-                'rate_limit' => $item->getProperty('rate-limit'),
-                'session_timeout' => $item->getProperty('session-timeout'),
-            ];
-        }
+$profiles = [];
+$resProfiles = $client->sendSync(new Request('/ip/hotspot/user/profile/print'));
+
+foreach ($resProfiles as $item) {
+    if ($item->getType() === Response::TYPE_DATA) {
+        $name = $item->getProperty('name');
+        $rate_limit = $item->getProperty('rate-limit');
+        $session_timeout = $item->getProperty('session-timeout');
+
+        // Normalisasi nama agar cocok
+        $normalizedName = strtolower(trim($name));
+        $price = isset($firebaseProfiles[$normalizedName]['price']) ? (int)$firebaseProfiles[$normalizedName]['price'] : null;
+
+        $profiles[] = [
+            'name' => $name,
+            'rate_limit' => $rate_limit,
+            'session_timeout' => $session_timeout,
+            'price' => $price,
+        ];
     }
+}
 
     echo json_encode([
         "success" => true,
         "data" => [
             "users" => $users,
             "servers" => $servers,
-            "profiles" => $profiles
+            "profiles" => $profiles,
         ]
     ]);
 

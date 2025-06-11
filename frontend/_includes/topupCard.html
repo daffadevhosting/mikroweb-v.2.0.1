@@ -67,6 +67,7 @@
       <select id="profileDropdown" class="form-select">
         <option selected disabled>Loading profiles...</option>
       </select>
+    <div id="priceInfo" class="badge text-bg-success mt-2" style="font-size: 14px;"></div>
     </div>
 
     <div class="mb-4">
@@ -133,6 +134,33 @@ async function loadDropdownData() {
   });
 }
 
+function updatePriceInfo() {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+
+  const uid = user.uid;
+  const selectedProfile = profileDropdown.value;
+
+  if (!selectedProfile) {
+    document.getElementById("priceInfo").textContent = "";
+    return;
+  }
+
+  firebase.database().ref(`user_profiles/${uid}/${selectedProfile}/price`).once("value")
+    .then(snapshot => {
+      const price = snapshot.val();
+      const priceDisplay = price ? `💰 Harga Paket: Rp ${price.toLocaleString()}` : "💡 Tidak untuk disewakan.";
+      document.getElementById("priceInfo").textContent = priceDisplay;
+    })
+    .catch(error => {
+      console.error("❌ Gagal ambil harga:", error);
+      document.getElementById("priceInfo").textContent = "⚠️ Gagal mengambil harga.";
+    });
+}
+
+// Tambahkan listener saat user memilih profile
+document.getElementById("profileDropdown").addEventListener("change", updatePriceInfo);
+
 loadDropdownData();
 </script>
 <script>
@@ -174,7 +202,7 @@ firebase.auth().onAuthStateChanged(async function (user) {
         throw new Error(result?.message || "TopUp gagal");
       }
       
-      showToast("Berhasil", "✅ TopUp user " + result.username + ", user-profile " + result.profile + " di server " + result.server +  ". Berhasil!", "success");
+      showToast("Berhasil", "✅ TopUp user " + result.username + ", user-profile " + result.profile + " di server " + result.server +  ". Berhasil! Harga Rp." + result.harga, "success");
       setTimeout(() => location.reload(), 3000);
 
     } catch (e) {

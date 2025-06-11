@@ -49,11 +49,26 @@ try {
     $client = new RouterOS\Client($ip, $username, $password);
     $profiles = [];
 
+    
+// Ambil semua profile dari Firebase dan normalisasi key-nya (lowercase tanpa spasi)
+$firebaseProfilesRaw = $database->getReference("user_profiles/{$uid}")->getValue();
+$firebaseProfiles = [];
+
+foreach ($firebaseProfilesRaw as $key => $data) {
+    $normalizedKey = strtolower(trim($key));
+    $firebaseProfiles[$normalizedKey] = $data;
+}
+
     // 🧾 Ambil semua user-profiles
     $responses = $client->sendSync(new RouterOS\Request('/ip/hotspot/user/profile/print'));
 
     foreach ($responses as $res) {
         if ($res->getType() === RouterOS\Response::TYPE_DATA) {
+
+        // Normalisasi nama agar cocok
+        $normalizedName = strtolower(trim($name));
+        $price = isset($firebaseProfiles[$normalizedName]['price']) ? (int)$firebaseProfiles[$normalizedName]['price'] : null;
+
             $profile = [
                 'keyId' => $res->getProperty('.id') ?? '',
                 'name' => $res->getProperty('name') ?? '',
@@ -66,6 +81,7 @@ try {
                 'idle-timeout' => $res->getProperty('idle-timeout') ?? '',
                 'keepalive-timeout' => $res->getProperty('keepalive-timeout') ?? '',
                 'status-autorefresh' => $res->getProperty('status-autorefresh') ?? '',
+                'price' =>  $res->getProperty('price') ?? '',
             ];
             $profiles[] = $profile;
         }

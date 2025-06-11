@@ -53,86 +53,91 @@ MikroWeb adalah sistem dashboard hotspot berbasis **MikroTik RouterOS** yang ter
 
 ### script on-login yang dipakai.
 ```rsc
-{
-  :local date [ /system clock get date ];                          # Ambil tanggal hari ini
-  :local year [ :pick $date 7 11 ];                                # Ambil tahun (dari string date)
-  :local month [ :pick $date 0 3 ];                                # Ambil bulan dalam huruf (Jan, Feb, dst)
+:put (",ntf,,enable,")
 
-  :local comment [ /ip hotspot user get [find where name="$user"] comment]; # Ambil comment dari user
-  :local ucode [:pick $comment 0 2];                               # Ambil 2 karakter pertama (kalo ada tag khusus)
+:local userComment [/ip hotspot user get [find where name="$user"] comment]
 
-  :if ($ucode = "up" or $comment = "") do={                        # Kalau belum ada comment yang valid
-    /system scheduler add name="$user" disable=no start-date=$date interval="1d";
+# ✅ Lewati jika sudah ada comment yang berisi "exp:"
+:if ([:pick $userComment 0 4] != "exp:") do={
 
-    :delay 2s; # Nunggu scheduler kebentuk
+  :local curDate [/system clock get date]   ;# format: jun/07/2025
+  :local curTime [/system clock get time]   ;# format: 07:40:02
 
-    :local exp [ /system scheduler get [find where name="$user"] next-run]; # Ambil waktu next-run scheduler
+  # Tambahkan scheduler sebagai placeholder expired
+  /system scheduler add name="exp-$user" interval=1d start-date=$curDate start-time=$curTime on-event=":log info expired-$user" comment="temp"
 
-    :local getxp [len $exp];
-    :if ($getxp = 15) do={                                         # Format panjang (misal: "jun/06 13:05:00")
-      :local d [:pick $exp 0 6];                                   # Ambil tanggal
-      :local t [:pick $exp 7 16];                                  # Ambil jam
-      :local s ("/");
-      :local exp ("$d$s$year $t");                                 # Gabungkan jadi format final
-      /ip hotspot user set comment=$exp [find where name="$user"];
-    };
+  # Ambil scheduler `next-run` pakai polling (maks 5 detik)
+  :local expireTime ""
+  :local count 0
+  :do {
+    :set expireTime [/system scheduler get [find where name="exp-$user"] next-run]
+    :if ($expireTime != "") do={ :set count 99 } else={ :delay 1s }
+    :set count ($count + 1)
+  } while=($count < 5)
 
-    :if ($getxp = 8) do={                                          # Format pendek (kalau ada case aneh)
-      /ip hotspot user set comment="$date $exp" [find where name="$user"];
-    };
+  # Format ulang next-run menjadi "exp:DD/MM/YYYY HH:MM"
+  :if ($expireTime != "") do={
 
-    :if ($getxp > 15) do={                                         # Kalau format panjang tapi gak pas
-      /ip hotspot user set comment=$exp [find where name="$user"];
-    };
+    # Contoh hasil: "jun/08/2025 07:40:00"
+    :local rawDate [:pick $expireTime 0 11]
+    :local rawTime [:pick $expireTime 12 17]
 
-    /system scheduler remove [find where name="$user"];           # Hapus scheduler dummy tadi
+    :local day [:pick $rawDate 4 6]
+    :local monthStr [:pick $rawDate 0 3]
+    :local year [:pick $rawDate 7 11]
 
-    [:local mac $"mac-address";                                   # Set MAC address
-     /ip hotspot user set mac-address=$mac [find where name=$user]];
+    # Konversi month ke angka
+    :local monthArray {"jan"=1;"feb"=2;"mar"=3;"apr"=4;"may"=5;"jun"=6;"jul"=7;"aug"=8;"sep"=9;"oct"=10;"nov"=11;"dec"=12}
+    :local monthNum ($monthArray->$monthStr)
+    :if ([:len $monthNum] = 1) do={ :set monthNum ("0" . $monthNum) }
+
+    :local formattedDate ("exp:" . $day . "/" . $monthNum . "/" . $year . " " . $rawTime)
+
+    # Set comment user dengan format yang dikenali auto-kick script
+    /ip hotspot user set [find where name="$user"] comment=$formattedDate
   }
+
+  # Hapus scheduler setelah selesai
+  /system scheduler remove [find where name="exp-$user"]
 }
 ```
 ---
 
 ### script on-event yang dipakai.
 ```rsc
+:local name "{$name}"
+
 :local dateint do={
-  :local montharray {"jan";"feb";"mar";"apr";"may";"jun";"jul";"aug";"sep";"oct";"nov";"dec"};
+  :local montharray ( "jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec" );
   :local days [:pick $d 4 6];
   :local month [:pick $d 0 3];
   :local year [:pick $d 7 11];
-  :local monthint [:find $montharray $month];
-  :set month ($monthint + 1);
-  :if ([:len $month] = 1) do={:set month ("0".$month);}
-  :return [:tonum ($year.$month.$days)];
-}
+  :local monthint ([:find $montharray $month]);
+  :local month ($monthint + 1);
+  :if ( [len $month] = 1) do={:return [:tonum ("$year0$month$days")];} else={:return [:tonum ("$year$month$days")];}
+};
 
-:local timeint do={
-  :local hours [:pick $t 0 2];
-  :local minutes [:pick $t 3 5];
-  :return ($hours * 60 + $minutes);
-}
+:local timeint do={ :local hours [:pick $t 0 2]; :local minutes [:pick $t 3 5]; :return ($hours * 60 + $minutes); };
 
 :local date [/system clock get date];
 :local time [/system clock get time];
 :local today [$dateint d=$date];
 :local curtime [$timeint t=$time];
 
-:foreach i in=[/ip hotspot user find] do={
+:foreach i in=[/ip hotspot user find where profile=$name] do={
   :local comment [/ip hotspot user get $i comment];
-  :local name [/ip hotspot user get $i name];
-  :if ([:len $comment] >= 19) do={
-    :if ([:pick $comment 2 3] = "/" && [:pick $comment 5 6] = "/") do={
-      :local gettime [:pick $comment 11 16];
-      :local expd [$dateint d=$comment];
-      :local expt [$timeint t=$gettime];
+  :local uname [/ip hotspot user get $i name];
 
-      :if (($expd < $today) or ($expd = $today and $expt < $curtime)) do={
-        /ip hotspot user set $i limit-uptime=1s;
-        :foreach a in=[/ip hotspot active find where user=$name] do={
-          /ip hotspot active remove $a;
-        }
-      }
+  :if ([:pick $comment 0 4] = "exp:") do={
+    :local expdate [:pick $comment 4 14];
+    :local exptime [:pick $comment 15 20];
+
+    :local expd [$dateint d=$expdate];
+    :local expt [$timeint t=$exptime];
+
+    :if (($expd < $today) or ($expd = $today and $expt < $curtime)) do={
+      /ip hotspot user set limit-uptime=1s $i
+      /ip hotspot active remove [find where user=$uname]
     }
   }
 }

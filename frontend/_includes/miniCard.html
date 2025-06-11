@@ -109,39 +109,43 @@ function formatDate(date) {
   return date.toISOString().slice(0, 10); // "YYYY-MM-DD"
 }
 
-async function fetchPendapatan() {
-  const today = formatDate(new Date());
-  const startOfMonth = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+    async function fetchPendapatan() {
+      const today = formatDate(new Date()); // Hasilnya: "2025-06-11"
+      const startOfMonth = formatDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)); // "2025-06-01"
 
-  let pendapatanHarian = 0;
-  let pendapatanBulanan = 0;
+      let pendapatanHarian = 0;
+      let pendapatanBulanan = 0;
 
-  const uid = firebase.auth().currentUser.uid;
-  const snapshot = await db.ref(`topup_logs/${uid}`).once('value');
-  if (!snapshot.exists()) return { pendapatanHarian, pendapatanBulanan };
+      const uid = firebase.auth().currentUser.uid;
+      const snapshot = await db.ref(`topup_logs/${uid}`).once('value');
+      if (!snapshot.exists()) return { pendapatanHarian, pendapatanBulanan };
 
-  snapshot.forEach(userSnap => {
-    userSnap.forEach(topupSnap => {
-      const data = topupSnap.val();
-      const tanggal = data.tanggal?.slice(0, 10); // Ambil "YYYY-MM-DD"
-      const harga = Number(data.harga || 0);
+      snapshot.forEach(logSnap => {
+        const data = logSnap.val();
+        const tanggal = data.tanggal?.slice(0, 10); // "YYYY-MM-DD"
+        const harga = Number(data.price || 0); // Ganti dari `data.harga` → `data.price`
 
-      if (tanggal === today) {
-        pendapatanHarian += harga;
-      }
+        if (tanggal === today) {
+          pendapatanHarian += harga;
+        }
 
-      if (tanggal >= startOfMonth) {
-        pendapatanBulanan += harga;
-      }
-    });
-  });
+        if (tanggal >= startOfMonth) {
+          pendapatanBulanan += harga;
+        }
+      });
 
-  return { pendapatanHarian, pendapatanBulanan };
-}
+      return { pendapatanHarian, pendapatanBulanan };
+    }
 
-  fetchPendapatan().then(({pendapatanHarian, pendapatanBulanan}) => {
-    document.getElementById('daily-income').textContent = pendapatanHarian.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
-    document.getElementById('monthly-income').textContent = pendapatanBulanan.toLocaleString('id-ID', {style: 'currency', currency: 'IDR'});
+    fetchPendapatan().then(({ pendapatanHarian, pendapatanBulanan }) => {
+      document.getElementById('daily-income').textContent = pendapatanHarian.toLocaleString('id-ID', {
+        style: 'currency',
+        currency: 'IDR'
+      });
+      document.getElementById('monthly-income').textContent = pendapatanBulanan.toLocaleString('id-ID', {
+        style: 'currency',
+        currency: 'IDR'
+      });
     });
   }
 });

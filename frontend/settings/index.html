@@ -132,6 +132,7 @@ function deleteRouter(routerId) {
           <th>Rate Limit</th>
           <th>Session Timeout</th>
           <th>Shared Users</th>
+          <th>Harga</th>
           <th>Aksi</th>
         </tr>
       </thead>
@@ -197,6 +198,7 @@ function renderProfiles() {
           <td>${p.rate_limit || '-'}</td>
           <td>${p.session_timeout || '-'}</td>
           <td>${p.shared_users || '-'}</td>
+          <td>${p.price || '-'}</td>
           <td>
             <button class="btn btn-sm btn-warning me-1" onclick="editProfile('${p.name}')">
               <i class="bi bi-pencil-square"></i>
@@ -254,7 +256,7 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
   if (result.success) {
     showToast('Sukses', '✅ Profile berhasil dihapus', 'success');
     setTimeout(() => {
-      loadUserProfiles();
+      renderProfiles();
     }, 1000);
   } else {
     showToast('Gagal', result.message || 'Gagal menghapus profile', 'error');

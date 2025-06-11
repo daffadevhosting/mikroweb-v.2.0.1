@@ -1,0 +1,73 @@
+    <div class="col-md-12 mb-4">
+        <div class="card shadow blurry">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between">
+                <h5 class="card-title text-white">Log Topup</h5>
+              </div>
+            <div class="table-responsive">
+                <table class="table text-light mb-0">
+                    <thead>
+                        <tr>
+                        <th>Tanggal</th>
+                        <th>Username</th>
+                        <th>Profile</th>
+                        <th>Jenis</th>
+                        <th>Limit</th>
+                        <th>Masa Aktif</th>
+                        <th>Harga</th>
+                        <th>Server</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body">
+                        <tr><td colspan="8" class="text-center">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+<script>
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (user) {
+    const token = await user.getIdToken();
+
+async function fetchTopupLogs() {
+  const uid = firebase.auth().currentUser.uid;
+  const snapshot = await db.ref(`topup_logs/${uid}`).once('value');
+  const logs = [];
+
+  if (snapshot.exists()) {
+    snapshot.forEach(childSnap => {
+      const data = childSnap.val();
+      logs.push({ id: childSnap.key, ...data });
+    });
+  }
+
+  return logs;
+}
+
+fetchTopupLogs().then(logs => {
+  const tableBody = document.getElementById('log-table-body');
+  tableBody.innerHTML = ''; // Kosongkan dulu
+
+  logs.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); // urutkan terbaru dulu
+
+  logs.forEach(log => {
+    const row = `
+      <tr>
+        <td>${log.tanggal}</td>
+        <td>${log.username}</td>
+        <td>${log.user_profile}</td>
+        <td>${log.jenis_paket}</td>
+        <td>${log.limit}</td>
+        <td>${log.masa_aktif} hari</td>
+        <td>${Number(log.price).toLocaleString('id-ID', {style: 'currency', currency: 'IDR'})}</td>
+        <td>${log.server}</td>
+      </tr>
+    `;
+    tableBody.insertAdjacentHTML('beforeend', row);
+  });
+});
+  }
+});
+</script>

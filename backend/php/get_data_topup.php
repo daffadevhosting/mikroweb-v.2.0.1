@@ -56,7 +56,6 @@ try {
     foreach ($resUsers as $item) {
         if ($item->getType() === Response::TYPE_DATA) {
             $users[] = ['name' => $item->getProperty('name'),
-                        'limit_uptime' => $item->getProperty('limit-uptime')
                     ];
         }
     }
@@ -69,7 +68,7 @@ try {
             $servers[] = ['name' => $item->getProperty('name')];
         }
     }
-    
+
 // Ambil semua profile dari Firebase dan normalisasi key-nya (lowercase tanpa spasi)
 $firebaseProfilesRaw = $database->getReference("user_profiles/{$uid}")->getValue();
 $firebaseProfiles = [];

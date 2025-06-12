@@ -51,7 +51,13 @@
     </div>
 </div>
 <script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        document.addEventListener("DOMContentLoaded", function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
     const base = '{{ site.baseurl }}'; // Untuk Jekyll
     const currentLink = window.location.pathname.replace(base, '');
     const drawerLinks = document.querySelectorAll('.navigationDrawer ul.menu li a');

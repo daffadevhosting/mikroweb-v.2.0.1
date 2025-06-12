@@ -255,25 +255,37 @@ body {
 </section>
 
   {% include liveToast.html %}
-  <script>
-    document.getElementById("adminLoginForm").addEventListener("submit", function(e) {
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // ✅ Jika sudah login, langsung redirect
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        window.location.href = "/"; // Ganti dengan dashboard utama jika perlu
+      }
+    });
+
+    // 🎯 Form submit login
+    const form = document.getElementById("adminLoginForm");
+    form.addEventListener("submit", function (e) {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      const errorMsg = document.getElementById("error-msg");
 
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-        showToast("Login", "Autentikasi berhasil! Mengalihkan...", "success");
+          showToast("Login", "Autentikasi berhasil! Mengalihkan...", "success");
           setTimeout(() => {
             window.location.href = "/";
-          }, 3000);
+          }, 1500); // Lebih cepat redirect
         })
         .catch((error) => {
-    showToast("Login Gagal", "Terjadi kesalahan saat autentikasi", "danger");
+          console.error("Login Error:", error.code, error.message);
+          showToast("Login Gagal", error.message, "danger");
         });
     });
-  </script>
+  });
+</script>
+
 <script src="{{ '/assets/js/alert.js' | relative_url }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>
 <script src="{{ '/assets/vendor/bootstrap/bootstrap/dist/js/bootstrap.min.js' | relative_url }}" crossorigin="anonymous"></script>

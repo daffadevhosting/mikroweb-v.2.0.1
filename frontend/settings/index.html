@@ -264,7 +264,8 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
   const result = await response.json();
 
   if (result.success) {
-    renderPagination();
+    allProfiles = allProfiles.filter(p => p.keyId !== selectedProfile.keyId);
+    renderProfiles();
     showToast('Sukses', '✅ Profile berhasil dihapus', 'success');
   } else {
     showToast('Gagal', result.message || 'Gagal menghapus profile', 'error');

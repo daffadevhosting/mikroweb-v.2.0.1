@@ -27,7 +27,9 @@
           <div>
             <input type="number" class="form-control" id="price" name="price" placeholder="Harga sewa" min="1000">
           </div>
-        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Simpan</button>
+        <button type="submit" class="btn btn-primary">
+          <span class="btn-text">Ya, Simpan</span>
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button>
       </div>
       </form>
   </div>
@@ -38,8 +40,19 @@ firebase.auth().onAuthStateChanged(async function(user) {
 
   const idToken = await user.getIdToken();
 
-  document.getElementById('formAddProfile').addEventListener('submit', async function(e) {
+  const form = document.getElementById('formAddProfile');
+  const modal = document.getElementById('modalTambahProfile');
+  const btnSubmit = form.querySelector('button[type="submit"]');
+  const btnText = btnSubmit.querySelector('.btn-text');
+  const spinner = btnSubmit.querySelector('.spinner-border');
+
+  form.addEventListener('submit', async function(e) {
     e.preventDefault();
+
+    // Tampilkan spinner dan disable tombol
+    btnText.classList.add('d-none');
+    spinner.classList.remove('d-none');
+    btnSubmit.disabled = true;
 
     const payload = {
       name: document.getElementById("profileName").value,
@@ -49,27 +62,36 @@ firebase.auth().onAuthStateChanged(async function(user) {
       price: document.getElementById("price").value
     };
 
-    const response = await fetch('{{site.php_url}}/php/add_user_profile.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + idToken
-      },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const response = await fetch('{{site.php_url}}/php/add_user_profile.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + idToken
+        },
+        body: JSON.stringify(payload)
+      });
 
       const result = await response.json();
 
-    if (result.success) {
-      showToast('Berhasil', result.message, 'success');
-      document.getElementById('formAddProfile').reset();
-      setTimeout(() => {
-        renderProfiles();
-      }, 2000);
-    } else {
-      showToast('Gagal', result.message || 'Gagal tambah profile', 'error');
+      if (result.success) {
+        showToast('Berhasil', result.message, 'success');
+        form.reset();
+        renderProfiles(); // render ulang table
+        bootstrap.Modal.getInstance(modal).hide();
+      } else {
+        showToast('Gagal', result.message || 'Gagal tambah profile', 'error');
+      }
+    } catch (err) {
+      showToast('Error', 'Terjadi kesalahan saat menyimpan data', 'error');
+      console.error(err);
     }
+
+    // Sembunyikan spinner dan enable tombol kembali
+    spinner.classList.add('d-none');
+    btnText.classList.remove('d-none');
+    btnSubmit.disabled = false;
   });
 });
 </script>

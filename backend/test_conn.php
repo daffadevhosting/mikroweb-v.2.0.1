@@ -74,6 +74,8 @@ if (strpos($acceptHeader, 'application/json') !== false) {
     exit;
 }
 
+$isJsonRequest = strpos($acceptHeader, 'application/json') !== false;
+
 if ($isJsonRequest) {
     respond([
         "success" => $statusClass === 'success',

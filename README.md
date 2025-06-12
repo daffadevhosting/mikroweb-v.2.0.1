@@ -1,10 +1,22 @@
-## 🌐 MikroWeb v2.0.1 - Fullstack Hotspot Dashboard 🔥
+## 🌐 MikroWeb v.2.0.1 - Fullstack Dashboard Hotspot 🔥
 
-MikroWeb adalah sistem dashboard hotspot berbasis **MikroTik RouterOS** yang terhubung ke **Firebase** dan **PHP**, memungkinkan kamu mengelola user hotspot, topup paket, tracking statistik, dan automasi jadwal kadaluarsa akun user.
+[![GitHub stars](https://img.shields.io/github/stars/putridinar/mikroweb-v.2.0.1.svg)](https://github.com/putridinar/mikroweb-v.2.0.1/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/putridinar/mikroweb-v.2.0.1.svg)](https://github.com/putridinar/mikroweb-v.2.0.1/network)
+[![Last Commit](https://img.shields.io/github/last-commit/putridinar/mikroweb-v.2.0.1.svg)](https://github.com/putridinar/mikroweb-v.2.0.1/commits/main)
+
+MikroWeb adalah **open-source hotspot management tool** untuk **MikroTik RouterOS**, menggunakan **PHP backend, Firebase Realtime Database**, dan frontend ringan berbasis **Jekyll**. Cocok untuk **ISP lokal, RT/RW Net**, dan **warung internet** yang ingin mengelola user secara otomatis dan efisien.
 
 > 🔐 Fullstack & Secure — Backend dengan PHP + Firebase Auth + Firebase Realtime Database. Frontend pakai HTML + JS (Jekyll friendly).
 
 ---
+
+## 🌍 Live Demo
+Kamu bisa melihat demo dashboard online di sini:
+
+👉 [Demo Dummy](https://dummy-mikroweb.pages.dev)
+
+Project ini juga bisa di-deploy ke [Cloudflare Pages](https://pages.cloudflare.com).
+
 
 ## 🚀 Fitur Utama
 
@@ -172,8 +184,8 @@ Kalau kamu mau bikin hanya 1 scheduler global untuk semua profile (bukan per pro
 ### 1. **Clone project**
 
 ```bash
-git clone https://github.com/putridinar/mikroweb-v2.0.1.git
-cd mikroweb-v2.0.1
+git clone https://github.com/putridinar/mikroweb-v.2.0.1.git
+cd mikroweb-v.2.0.1
 ```
 
 ## 🔧 Setup & Install
@@ -234,6 +246,9 @@ POST	/push_topup.php	TopUp user & jadwal expired
 POST	/routerOs/tambah_user.php	Tambah user ke Mikrotik
 GET	/conn/router_connect.php	Test koneksi router
 ```
+
+## 🔎 Keywords
+mikrotik hotspot manager, mikrotik dashboard, hotspot voucherless, rt rw net system, wifi management php, firebase hotspot panel, routerOS API PHP, open source mikrotik frontend
 
 ## ❤️ Credits
 PEAR2 RouterOS Library

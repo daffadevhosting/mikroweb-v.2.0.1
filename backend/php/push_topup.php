@@ -167,11 +167,26 @@ try {
     [/system scheduler remove [find where name={$scriptName}]];
     SCR;
 
-    $client->sendSync((new RouterOS\Request('/system/scheduler/add'))
-        ->setArgument('name', $scriptName)
-        ->setArgument('start-date', $expiredDateFormatted)
-        ->setArgument('interval', $sessionTimeout)
-        ->setArgument('on-event', $scriptBody));
+// 1. Cek scheduler lama
+$requestFind = new RouterOS\Request('/system/scheduler/print');
+$requestFind->setQuery(RouterOS\Query::where('name', $scriptName));
+$response = $client->sendSync($requestFind);
+
+// 2. Hapus jika ada
+foreach ($response as $item) {
+    if ($item->getType() === RouterOS\Response::TYPE_DATA) {
+        $id = $item->getProperty('.id');
+        $client->sendSync((new RouterOS\Request('/system/scheduler/remove'))
+            ->setArgument('.id', $id));
+    }
+}
+
+// 3. Tambahkan scheduler baru
+$client->sendSync((new RouterOS\Request('/system/scheduler/add'))
+    ->setArgument('name', $scriptName)
+    ->setArgument('start-date', $expiredDateFormatted)
+    ->setArgument('interval', $sessionTimeout)
+    ->setArgument('on-event', $scriptBody));
 
     $logId = uniqid();
     $logData = [

@@ -25,6 +25,9 @@ permalink: /settings
       <tbody></tbody>
     </table>
   </div>
+  <nav>
+    <ul class="justify-content-end mt-2 mx-3"></ul>
+  </nav>
 </div>
 
 <script>
@@ -52,13 +55,17 @@ firebase.auth().onAuthStateChanged((user) => {
           <td>${r.username}</td>
           <td>${defaultBadge}</td>
           <td>
-            <button class="btn btn-sm btn-primary" onclick="editRouter('${key}')"><i class="bi bi-pencil-square"></i></button>
-            <button class="btn btn-sm btn-danger" onclick="deleteRouter('${key}')"><i class="bi bi-trash3"></i></button>
-            ${!r.isDefault ? `<button class="btn btn-sm btn-success" onclick="setDefaultRouter('${key}')"><i class="bi bi-plugin"></i></button>` : ""}
+            <button class="btn btn-sm btn-primary" onclick="editRouter('${key}')" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRouter('${key}')" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Hapus"><i class="bi bi-trash3"></i></button>
+            ${!r.isDefault ? `<button class="btn btn-sm btn-success" onclick="setDefaultRouter('${key}')" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Jadikan default"><i class="bi bi-plugin"></i></button>` : ""}
           </td>
         </tr>
       `;
       table.innerHTML += row;
+    });
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
     });
   });
 });
@@ -148,7 +155,6 @@ const pageSize = 10;
 let currentPage = 1;
 let allProfiles = [];
 
-
 async function loadProfiles() {
   document.getElementById('loadingSpinner').classList.remove('d-none');
   document.getElementById('profileTable').classList.add('d-none');
@@ -200,10 +206,10 @@ function renderProfiles() {
           <td>${p.shared_users || '-'}</td>
           <td>${p.price || '-'}</td>
           <td>
-            <button class="btn btn-sm btn-warning me-1" onclick="editProfile('${p.name}')">
+            <button class="btn btn-sm btn-warning me-1" onclick="editProfile('${p.name}')" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit">
               <i class="bi bi-pencil-square"></i>
             </button>
-            <button class="btn btn-danger btn-sm btn-delete" data-id="${p.keyId}" data-name="${p.name}">
+            <button class="btn btn-danger btn-sm btn-delete" data-id="${p.keyId}" data-name="${p.name}" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Hapus">
               <i class="bi bi-trash3"></i>
             </button>
           </td>
@@ -212,6 +218,10 @@ function renderProfiles() {
       tbody.innerHTML += row;
     }
   });
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 
   renderPagination();
 }
@@ -254,10 +264,8 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
   const result = await response.json();
 
   if (result.success) {
+    renderPagination();
     showToast('Sukses', '✅ Profile berhasil dihapus', 'success');
-    setTimeout(() => {
-      renderProfiles();
-    }, 1000);
   } else {
     showToast('Gagal', result.message || 'Gagal menghapus profile', 'error');
   }

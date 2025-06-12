@@ -1,13 +1,12 @@
 <!-- Modal konfirmasi delete -->
-<div class="modal fade" id="globalConfirmModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+<div class="modal fade" id="globalConfirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-danger">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Hapus</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi</h5>
       </div>
       <div class="modal-body">
-        Yakin ingin menghapus profile <strong><span id="globalConfirmMessage"></span></strong>?
+        <strong><span id="globalConfirmMessage"></span></strong>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -16,3 +15,25 @@
     </div>
   </div>
 </div>
+<script>
+  // Fungsi global konfirmasi hapus
+  function globalConfirm(itemName, onConfirmCallback) {
+    const confirmModal = new bootstrap.Modal(document.getElementById('globalConfirmModal'));
+    document.getElementById('globalConfirmMessage').textContent = itemName;
+
+    // Pastikan tidak menumpuk event
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+    // Event konfirmasi
+    newBtn.addEventListener('click', () => {
+      confirmModal.hide();
+      if (typeof onConfirmCallback === 'function') {
+        onConfirmCallback();
+      }
+    });
+
+    confirmModal.show();
+  }
+</script>

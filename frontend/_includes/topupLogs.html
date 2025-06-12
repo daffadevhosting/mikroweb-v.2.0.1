@@ -1,8 +1,14 @@
-    <div class="col-md-12 mb-4">
+<div class="col-md-12 mb-4">
         <div class="card shadow blurry">
             <div class="card-body">
               <div class="d-flex align-items-center justify-content-between">
                 <h5 class="card-title text-white">Log Topup</h5>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <button id="clearLogsBtn" class="btn btn-danger btn-sm">
+                  <i class="bi bi-trash"></i> Hapus Semua Log
+                </button>
+                <div id="pagination-controls" class="d-flex gap-2"></div>
               </div>
             <div class="table-responsive">
                 <table class="table text-light mb-0">
@@ -24,48 +30,94 @@
             </div>
             </div>
         </div>
-    </div>
+</div>
 <script>
 firebase.auth().onAuthStateChanged(async function(user) {
-  if (user) {
-    const token = await user.getIdToken();
+  if (!user) return;
 
-async function fetchTopupLogs() {
-  const uid = firebase.auth().currentUser.uid;
-  const snapshot = await db.ref(`topup_logs/${uid}`).once('value');
-  const logs = [];
+  const uid = user.uid;
+  const dbRef = db.ref(`topup_logs/${uid}`);
+  const tableBody = document.getElementById('log-table-body');
+  const paginationContainer = document.getElementById('pagination-controls');
+  const clearBtn = document.getElementById('clearLogsBtn');
+  const logsPerPage = 10;
+  let currentPage = 1;
+  let logs = [];
 
-  if (snapshot.exists()) {
-    snapshot.forEach(childSnap => {
-      const data = childSnap.val();
-      logs.push({ id: childSnap.key, ...data });
+  // Ambil log dari Firebase
+  async function fetchLogs() {
+    const snapshot = await dbRef.once('value');
+    logs = [];
+
+    if (snapshot.exists()) {
+      snapshot.forEach(childSnap => {
+        logs.push({ id: childSnap.key, ...childSnap.val() });
+      });
+    }
+
+    logs.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+    renderTable();
+    renderPagination();
+  }
+
+  // Tampilkan log ke tabel sesuai halaman
+  function renderTable() {
+    tableBody.innerHTML = '';
+    if (logs.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada log.</td></tr>';
+      return;
+    }
+
+    const start = (currentPage - 1) * logsPerPage;
+    const end = start + logsPerPage;
+    const currentLogs = logs.slice(start, end);
+
+    currentLogs.forEach(log => {
+      const row = `
+        <tr>
+          <td>${log.tanggal || '-'}</td>
+          <td>${log.username || '-'}</td>
+          <td>${log.user_profile || '-'}</td>
+          <td>${log.start_time || '-'}</td>
+          <td>${log.session_timeout || '-'}</td>
+          <td>${log.expired_time || '-'}</td>
+          <td>${log.price ? Number(log.price).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : '-'}</td>
+        </tr>
+      `;
+      tableBody.insertAdjacentHTML('beforeend', row);
     });
   }
 
-  return logs;
-}
+  // Paginasi kontrol
+  function renderPagination() {
+    paginationContainer.innerHTML = '';
+    const totalPages = Math.ceil(logs.length / logsPerPage);
 
-fetchTopupLogs().then(logs => {
-  const tableBody = document.getElementById('log-table-body');
-  tableBody.innerHTML = ''; // Kosongkan dulu
-
-  logs.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); // urutkan terbaru dulu
-
-  logs.forEach(log => {
-    const row = `
-      <tr>
-        <td>${log.tanggal}</td>
-        <td>${log.username}</td>
-        <td>${log.user_profile}</td>
-        <td>${log.start_time}</td>
-        <td>${log.session_timeout}</td>
-        <td>${log.expired_time}</td>
-        <td>${Number(log.price).toLocaleString('id-ID', {style: 'currency', currency: 'IDR'})}</td>
-      </tr>
-    `;
-    tableBody.insertAdjacentHTML('beforeend', row);
-  });
-});
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      btn.className = `btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-outline-light'}`;
+      btn.onclick = () => {
+        currentPage = i;
+        renderTable();
+        renderPagination();
+      };
+      paginationContainer.appendChild(btn);
+    }
   }
+
+  // Hapus semua log
+  clearBtn.addEventListener('click', async () => {
+    if (globalConfirm("Apakah kamu yakin ingin menghapus semua log? (aksi ini akan menghapus pendapatan bulanan).")) {
+      await dbRef.remove();
+      logs = [];
+      renderTable();
+      renderPagination();
+      showToast("Log Dihapus", "Semua log topup telah dihapus.", "success");
+    }
+  });
+
+  // Load awal
+  fetchLogs();
 });
 </script>

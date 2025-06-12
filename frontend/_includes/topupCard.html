@@ -21,7 +21,7 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.05);
     }
 
-    .btn-primary {
+    .btn-custom {
       border-radius: 2rem;
       padding: 0.6rem 2rem;
       font-weight: 600;
@@ -77,7 +77,7 @@
       </select>
     </div>
 
-    <button class="btn btn-primary w-100" id="topupBtn">
+    <button class="btn btn-primary btn-custom w-100" id="topupBtn" type="button">
       🚀 Topup Sekarang
     </button>
   </div>
@@ -129,6 +129,7 @@ async function loadDropdownData() {
       });
 
     } catch (error) {
+    showToast('Gagal', "❌ Error loading dropdown: " + error, 'error');
       console.error("❌ Error loading dropdown:", error);
     }
   });
@@ -168,11 +169,26 @@ firebase.auth().onAuthStateChanged(async function (user) {
   if (!user) return;
 
   const token = await user.getIdToken();
+  const topupBtn = document.getElementById("topupBtn");
 
-  document.getElementById("topupBtn").addEventListener("click", async function () {
+  function setTopupLoading(isLoading) {
+    if (isLoading) {
+      topupBtn.disabled = true;
+      topupBtn.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Proses TopUp...
+      `;
+    } else {
+      topupBtn.disabled = false;
+      topupBtn.innerHTML = '🚀 Topup Sekarang';
+    }
+  }
+
+  topupBtn.addEventListener("click", async function () {
     const userName = userDropdown.value;
     const server = serverDropdown.value;
     const userProfile = profileDropdown.value;
+
     if (!userName || !server || !userProfile) {
       showToast("⚠️", "Semua field harus diisi!", "warning");
       return;
@@ -185,6 +201,8 @@ firebase.auth().onAuthStateChanged(async function (user) {
     };
 
     try {
+      setTopupLoading(true); // 👈 Spinner aktif
+
       const response = await fetch("{{site.php_url}}/php/push_topup.php", {
         method: "POST",
         headers: {
@@ -201,12 +219,14 @@ firebase.auth().onAuthStateChanged(async function (user) {
       if (!response.ok || !result || !result.success) {
         throw new Error(result?.message || "TopUp gagal");
       }
-      
-      showToast("Berhasil", "✅ TopUp user " + result.username + ", user-profile " + result.profile + " di server " + result.server +  ". Berhasil! Harga Rp." + result.harga, "success");
+
+      showToast("Berhasil", `✅ TopUp user ${result.username}, profile ${result.profile} di server ${result.server} Harga: Rp.${result.harga}`, "success");
       setTimeout(() => location.reload(), 3000);
 
     } catch (e) {
-      alert("❌ Error koneksi: " + e.message);
+      showToast("Gagal", e.message, "danger");
+    } finally {
+      setTopupLoading(false); // 👈 Spinner off
     }
   });
 });

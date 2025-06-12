@@ -10,7 +10,8 @@ MikroWeb adalah **open-source hotspot management tool** untuk **MikroTik RouterO
 
 ---
 
-## 🌍 Live Demo
+## [🌍 Live Demo](https://mikroweb.pages.dev)
+
 Kamu bisa melihat demo dashboard online di sini:
 
 👉 [Demo Dummy](https://dummy-mikroweb.pages.dev)
@@ -26,7 +27,7 @@ Project ini juga bisa di-deploy ke [Cloudflare Pages](https://pages.cloudflare.c
 - 📜 Scheduler otomatis: disable user setelah masa aktif habis
 - ✅ Tidak perlu generate Voucher / Print / Kertas
 - 📈 Statistik penggunaan dan income harian/bulanan
-- 🛠️ Settings Router, Paket Hotspot, dan Bandwidth
+- 🛠️ Settings Router, Paket Hotspot, Bandwidth, dan Terminal
 - 📁 Struktur folder rapi dan terpisah (modular)
 - PPPoE (soon)
 

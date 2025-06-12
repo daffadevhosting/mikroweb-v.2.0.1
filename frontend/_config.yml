@@ -3,7 +3,7 @@ port: 1111
 title: MikroWeb
 description: Mikrotik Hotspot Management.
 baseurl: ""
-url: "http://localhost:1111"
+url: "https://mikroweb.pages.dev"
 
 author: Putri Dinar
 versi: v.2.0.1

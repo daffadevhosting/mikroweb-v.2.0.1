@@ -10,7 +10,10 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" id="confirmDeleteBtn">Hapus</button>
+        <button type="button" class="btn btn-primary" id="confirmDeleteBtn">
+          <span class="btn-text">Ya, Hapus</span>
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
       </div>
     </div>
   </div>
@@ -26,10 +29,19 @@
     const newBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
 
+    const spinner = newBtn.querySelector('.spinner-border');
+    const btnText = newBtn.querySelector('.btn-text');
+
     // Event konfirmasi
     newBtn.addEventListener('click', () => {
+        spinner.classList.add('d-none');
+        btnText.classList.remove('d-none');
+        newBtn.disabled = false;
       confirmModal.hide();
       if (typeof onConfirmCallback === 'function') {
+      spinner.classList.remove('d-none');
+      btnText.classList.add('d-none');
+      newBtn.disabled = true;
         onConfirmCallback();
       }
     });

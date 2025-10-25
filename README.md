@@ -1,8 +1,8 @@
 ## 🌐 MikroWeb v.2.0.1 - Fullstack Dashboard Hotspot 🔥
 
-[![GitHub stars](https://img.shields.io/github/stars/putridinar/mikroweb-v.2.0.1.svg)](https://github.com/putridinar/mikroweb-v.2.0.1/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/putridinar/mikroweb-v.2.0.1.svg)](https://github.com/putridinar/mikroweb-v.2.0.1/network)
-[![Last Commit](https://img.shields.io/github/last-commit/putridinar/mikroweb-v.2.0.1.svg)](https://github.com/putridinar/mikroweb-v.2.0.1/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/daffadevhosting/mikroweb-v.2.0.1.svg)](https://github.com/daffadevhosting/mikroweb-v.2.0.1/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/daffadevhosting/mikroweb-v.2.0.1.svg)](https://github.com/daffadevhosting/mikroweb-v.2.0.1/network)
+[![Last Commit](https://img.shields.io/github/last-commit/daffadevhosting/mikroweb-v.2.0.1.svg)](https://github.com/daffadevhosting/mikroweb-v.2.0.1/commits/main)
 
 MikroWeb adalah **open-source hotspot management tool** untuk **MikroTik RouterOS**, menggunakan **PHP backend, Firebase Realtime Database**, dan frontend ringan berbasis **Jekyll**. Cocok untuk **ISP lokal, RT/RW Net**, dan **warung internet** yang ingin mengelola user secara otomatis dan efisien.
 

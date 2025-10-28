@@ -185,7 +185,7 @@ Kalau kamu mau bikin hanya 1 scheduler global untuk semua profile (bukan per pro
 ### 1. **Clone project**
 
 ```bash
-git clone https://github.com/putridinar/mikroweb-v.2.0.1.git
+git clone https://github.com/daffadevhosting/mikroweb-v.2.0.1.git
 cd mikroweb-v.2.0.1
 ```
 

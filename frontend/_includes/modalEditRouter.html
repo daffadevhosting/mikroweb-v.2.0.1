@@ -3,35 +3,44 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="editRouterForm">
-        <div class="modal-header text-white">
+        <div class="modal-header text-white bg-primary">
           <h5 class="modal-title" id="editRouterLabel">Edit Router</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body">
+          <!-- Hidden Input untuk menyimpan ID Router yang sedang diedit -->
           <input type="hidden" id="editRouterId">
+
           <div class="mb-3">
             <label for="routerName" class="form-label">Nama Router</label>
             <input type="text" class="form-control" id="routerName" required>
           </div>
+
           <div class="mb-3">
             <label for="routerIP" class="form-label">IP Address</label>
-            <input type="text" class="form-control" id="routerIP" required>
+            <input type="text" class="form-control" id="routerIP" placeholder="192.168.88.1" required>
           </div>
+
           <div class="mb-3">
             <label for="routerUsername" class="form-label">Username</label>
             <input type="text" class="form-control" id="routerUsername" required>
           </div>
-<div class="mb-3">
-  <label for="routerPassword" class="form-label">Password</label>
-  <div class="input-group">
-    <input type="password" class="form-control" id="routerPassword" required>
-    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-      <i class="bi bi-eye" id="toggleIcon"></i>
-    </button>
-  </div>
-</div>
+
+          <div class="mb-3">
+            <label for="routerPassword" class="form-label">Password</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="routerPassword" required>
+              <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                <i class="bi bi-eye" id="toggleIcon"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Simpan</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary" id="saveRouterBtn">Simpan</button>
         </div>
       </form>
     </div>
@@ -39,48 +48,107 @@
 </div>
 
 <script>
+// Function untuk mengambil data router dan membuka modal
 function editRouter(routerId) {
-  const uid = firebase.auth().currentUser.uid;
-  firebase.database().ref(`mikrotik_logins/${uid}/${routerId}`).once("value").then((snap) => {
-    const r = snap.val();
-    document.getElementById("routerName").value = r.routerName || '';
-    document.getElementById("routerIP").value = r.ip || '';
-    document.getElementById("routerUsername").value = r.username || '';
-    document.getElementById("routerPassword").value = r.password || '';
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    alert("⚠️ Sesi pengguna tidak ditemukan. Silakan login kembali.");
+    return;
+  }
 
-    const modal = new bootstrap.Modal(document.getElementById('editRouterModal'));
-    modal.show();
-  });
+  const uid = user.uid;
+  firebase.database().ref(`mikrotik_logins/${uid}/${routerId}`).once("value")
+    .then((snap) => {
+      if (!snap.exists()) {
+        alert("❌ Data router tidak ditemukan!");
+        return;
+      }
+
+      const r = snap.val();
+
+      // Simpan routerId ke hidden field (PERBAIKAN UTAMA)
+      document.getElementById("editRouterId").value = routerId;
+      document.getElementById("routerName").value = r.routerName || '';
+      document.getElementById("routerIP").value = r.ip || '';
+      document.getElementById("routerUsername").value = r.username || '';
+      document.getElementById("routerPassword").value = r.password || '';
+
+      // Tampilkan Modal Bootstrap
+      const modalElement = document.getElementById('editRouterModal');
+      const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+      modal.show();
+    })
+    .catch((err) => {
+      console.error("Error fetching router data:", err);
+      alert("❌ Gagal memuat data router: " + err.message);
+    });
 }
 
-document.getElementById("editRouterForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const uid = firebase.auth().currentUser.uid;
-  const data = {
-    routerName: document.getElementById("routerName").value,
-    ip: document.getElementById("routerIP").value,
-    username: document.getElementById("routerUsername").value,
-    password: document.getElementById("routerPassword").value
-  };
-  firebase.database().ref(`mikrotik_logins/${uid}/${routerId}`).update(data)
-    .then(() => {
-      alert("✅ Router diperbarui");
-      bootstrap.Modal.getInstance(document.getElementById("editRouterModal")).hide();
-    })
-    .catch(err => alert("❌ Gagal: " + err));
-});
-document.getElementById('togglePassword').addEventListener('click', function () {
-  const passwordInput = document.getElementById('routerPassword');
-  const toggleIcon = document.getElementById('toggleIcon');
+// Inisialisasi event listener setelah DOM dimuat
+document.addEventListener("DOMContentLoaded", function () {
+  // Handler Submit Form Edit Router
+  const editRouterForm = document.getElementById("editRouterForm");
+  if (editRouterForm) {
+    editRouterForm.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-  // Cek tipe input saat ini
-  const isPassword = passwordInput.getAttribute('type') === 'password';
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        alert("⚠️ Silakan login kembali.");
+        return;
+      }
 
-  // Ubah tipe input
-  passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+      const uid = user.uid;
+      // Ambil routerId dari hidden field yang tersimpan
+      const routerId = document.getElementById("editRouterId").value;
 
-  // Ubah icon mata (mata terbuka <-> mata dicoret)
-  toggleIcon.classList.toggle('bi-eye');
-  toggleIcon.classList.toggle('bi-eye-slash');
+      if (!routerId) {
+        alert("❌ ID Router tidak valid!");
+        return;
+      }
+
+      const data = {
+        routerName: document.getElementById("routerName").value.trim(),
+        ip: document.getElementById("routerIP").value.trim(),
+        username: document.getElementById("routerUsername").value.trim(),
+        password: document.getElementById("routerPassword").value
+      };
+
+      const saveBtn = document.getElementById("saveRouterBtn");
+      saveBtn.disabled = true;
+      saveBtn.innerText = "Menyimpan...";
+
+      firebase.database().ref(`mikrotik_logins/${uid}/${routerId}`).update(data)
+        .then(() => {
+          alert("✅ Router berhasil diperbarui!");
+          const modalElement = document.getElementById("editRouterModal");
+          const modal = bootstrap.Modal.getInstance(modalElement);
+          if (modal) modal.hide();
+        })
+        .catch(err => {
+          console.error("Error updating router:", err);
+          alert("❌ Gagal memperbarui: " + err.message);
+        })
+        .finally(() => {
+          saveBtn.disabled = false;
+          saveBtn.innerText = "Simpan";
+        });
+    });
+  }
+
+  // Handler Toggle Show/Hide Password
+  const togglePasswordBtn = document.getElementById('togglePassword');
+  if (togglePasswordBtn) {
+    togglePasswordBtn.addEventListener('click', function () {
+      const passwordInput = document.getElementById('routerPassword');
+      const toggleIcon = document.getElementById('toggleIcon');
+
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+
+      toggleIcon.classList.toggle('bi-eye');
+      toggleIcon.classList.toggle('bi-eye-slash');
+    });
+  }
 });
 </script>

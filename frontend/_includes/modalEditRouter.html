@@ -21,11 +21,15 @@
             <label for="routerUsername" class="form-label">Username</label>
             <input type="text" class="form-control" id="routerUsername" required>
           </div>
-          <div class="mb-3">
-            <label for="routerPassword" class="form-label">Password</label>
-            <input type="password" class="form-control" id="routerPassword" required>
-          </div>
-        </div>
+<div class="mb-3">
+  <label for="routerPassword" class="form-label">Password</label>
+  <div class="input-group">
+    <input type="password" class="form-control" id="routerPassword" required>
+    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+      <i class="bi bi-eye" id="toggleIcon"></i>
+    </button>
+  </div>
+</div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Simpan</button>
         </div>
@@ -64,5 +68,19 @@ document.getElementById("editRouterForm").addEventListener("submit", (e) => {
       bootstrap.Modal.getInstance(document.getElementById("editRouterModal")).hide();
     })
     .catch(err => alert("❌ Gagal: " + err));
+});
+document.getElementById('togglePassword').addEventListener('click', function () {
+  const passwordInput = document.getElementById('routerPassword');
+  const toggleIcon = document.getElementById('toggleIcon');
+
+  // Cek tipe input saat ini
+  const isPassword = passwordInput.getAttribute('type') === 'password';
+
+  // Ubah tipe input
+  passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+
+  // Ubah icon mata (mata terbuka <-> mata dicoret)
+  toggleIcon.classList.toggle('bi-eye');
+  toggleIcon.classList.toggle('bi-eye-slash');
 });
 </script>
